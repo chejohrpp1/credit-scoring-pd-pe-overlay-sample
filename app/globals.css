@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
+root {
+/* colores base (claro) */
+--bg: #0b0f14; /* usa oscuro por defecto para parecer Streamlit dark */
+--panel: #161b22;
+--muted: #1f2630;
+--ring: #2b3442;
+--fg: #e5e7eb;
+--fg-muted: #a3aab6;
+--brand: #8b5cf6; /* indigo-violet */
+--ok: #22c55e;
+--warn: #f59e0b;
+--danger: #ef4444;
+}
+
+
+@media (prefers-color-scheme: light) {
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+--bg: #f7f7f8;
+--panel: #ffffff;
+--muted: #f2f3f5;
+--ring: #e5e7eb;
+--fg: #0f172a;
+--fg-muted: #6b7280;
+--brand: #4f46e5;
+--ok: #16a34a;
+--warn: #d97706;
+--danger: #dc2626;
+}
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+@theme {
+--color-background: var(--bg);
+--color-foreground: var(--fg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+
+html, body {
+height: 100%;
 }
+
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+background: var(--bg);
+color: var(--fg);
+font-feature-settings: "ss01" on, "ss02" on;
 }
+
+
+/* utilidades simples */
+.card { @apply rounded-2xl p-4 border; border-color: var(--ring); background: var(--panel); }
+.input { @apply w-full rounded-xl px-3 py-2 text-sm outline-none; background: var(--muted); color: var(--fg); border: 1px solid var(--ring); }
+.select { @apply w-full rounded-xl px-3 py-2 text-sm outline-none; background: var(--muted); color: var(--fg); border: 1px solid var(--ring); }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium; background: var(--brand); color: white; }
+.btn-secondary { background: var(--muted); color: var(--fg); border: 1px solid var(--ring); }
+.label { @apply text-xs; color: var(--fg-muted); }
+.metric { @apply text-2xl font-semibold; }
+
+
+/* tabla simple */
+.table th { @apply text-left text-xs font-medium px-3 py-2; color: var(--fg-muted); background: #0f1420; }
+.table td { @apply px-3 py-2 border-b; border-color: var(--ring); }
