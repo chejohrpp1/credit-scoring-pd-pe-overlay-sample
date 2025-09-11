@@ -237,7 +237,7 @@ export default function PDPage() {
               <input
                 className="input"
                 type="number"
-                min={15}
+                min={18}
                 max={101}
                 value={f.edad}
                 onChange={(e) => set("edad")(Number(e.target.value))}
@@ -348,8 +348,8 @@ export default function PDPage() {
           <table className="table w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th>Variable</th>
-                <th>Valor</th>
+                <th><p className="text-white">Variable</p></th>
+                <th><p className="text-white">Valor</p></th>
               </tr>
             </thead>
             <tbody>
