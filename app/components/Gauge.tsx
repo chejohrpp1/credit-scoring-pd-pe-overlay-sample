@@ -85,13 +85,13 @@ export function Gauge({
       {/* label */}
       <text
         x={100}
-        y={105}
+        y={104}
         textAnchor="middle"
-        dy="1.2em"
+        dy="1.1em"
         fontSize="18"
         fill="var(--fg)"
       >
-        {v.toFixed(1)}
+        {v.toFixed(1)}%
       </text>
     </svg>
   );

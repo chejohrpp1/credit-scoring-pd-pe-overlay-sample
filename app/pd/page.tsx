@@ -80,7 +80,7 @@ export default function PDPage() {
     ingresos: 6000,
     edad: 23,
     sexo: "Masculino",
-    antiguedad: 4,
+    antiguedad: 4,  
     empleo: "Formal",
     uso: "Productivos",
     garantia: "Prendaria/Prenda",
@@ -187,7 +187,7 @@ export default function PDPage() {
             </div>
 
             <div>
-              <div className="label mb-1">Buró</div>
+              <div className="label mb-1">Record crediticio</div>
               <select
                 className="select"
                 value={f.buro}
@@ -355,7 +355,7 @@ export default function PDPage() {
             <tbody>
               {Object.entries(f).map(([k, v]) => (
                 <tr key={k}>
-                  <td className="capitalize">{k}</td>
+                  <td className="capitalize">{k === "buro" ? "Record crediticio" : k}</td>
                   <td>{String(v)}</td>
                 </tr>
               ))}

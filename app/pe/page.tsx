@@ -73,13 +73,13 @@ export default function PEPage() {
       return {
         label: "Riesgo Mínimo",
         color: "#009000",
-        description: "Aprobación directa por el analista de crédito",
+        description: "Aprobación directa por el comité de agencia",
       };
     } else if (elTotal <= 25000) {
       return {
         label: "Riesgo Moderado",
         color: "#002960",
-        description: "Revisión por el comité de crédito",
+        description: "Revisión por el comité técnico de crédito",
       };
     } else {
       return {
