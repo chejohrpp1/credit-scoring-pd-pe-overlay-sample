@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Percent, CircleDollarSign, ChevronDown } from "lucide-react";
+import { Percent, ChevronDown } from "lucide-react";
 
 // Validation function from PE page
 function validateNumericInput(value: string): {

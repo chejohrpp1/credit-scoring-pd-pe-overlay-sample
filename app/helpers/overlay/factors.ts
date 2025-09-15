@@ -1,3 +1,16 @@
+export type SelectLevel = 'Bajo' | 'Medio' | 'Alto';
+
+export type VariableRange = Readonly<{ Rango: string; Ponderador: string }>;
+export type VariableDef = Readonly<{
+  Variable: string;
+  Rangos: ReadonlyArray<VariableRange>;
+}>;
+export type CategoryDef = Readonly<{
+  Categoria: CategoryKey;
+  Variables: ReadonlyArray<VariableDef>;
+}>;
+
+
 export type CategoryKey =
   | "Entorno Económico Nacional"
   | "Entorno Regional"
@@ -117,7 +130,7 @@ export const FACTOR_SCHEMA = [
 
 export function inferFieldKind(v: {
   Variable: string;
-  Rangos: Array<{ Rango: string; Ponderador: string }>;
+  Rangos: ReadonlyArray<{ Rango: string; Ponderador: string }>;
 }): "percent" | "amount" | "select" {
   const name = v.Variable.toLowerCase();
   if (name.includes("%")) return "percent";
@@ -140,8 +153,8 @@ export const parsePctStr = (s: string) =>
 
 // Coincide el valor con el rango textual y retorna beta (decimal)
 export function matchRangeGetBeta(
-  v: { Variable: string; Rangos: Array<{ Rango: string; Ponderador: string }> },
-  raw: any
+  v: { Variable: string; Rangos: ReadonlyArray<{ Rango: string; Ponderador: string }> },
+  raw: number | string
 ): number {
   const kind = inferFieldKind(v);
   // Select directo por etiqueta

@@ -23,7 +23,12 @@ export function Gauge({
   const y = 100 + 80 * Math.sin(theta);
   const needleColor = v <= 3 ? "#1802BF" : v <= 10 ? "#19C904" : v < 20 ? "#DAED07" : v <= 30 ? "#F79705" : "#ED1C1C";
   return (
-    <svg viewBox="0 0 200 120" className="w-full h-full">
+    <svg
+      viewBox="0 0 200 120"
+      className="w-full"
+      preserveAspectRatio="xMidYMid meet"
+      style={{ height: "auto", maxHeight: "100%", display: "block" }}
+    >
       {/* arco base */}
       <path
         d="M20,100 A80,80 0 0,1 180,100"
@@ -87,8 +92,8 @@ export function Gauge({
         x={100}
         y={104}
         textAnchor="middle"
-        dy="1.1em"
-        fontSize="18"
+        dy="1.0em"
+        fontSize={15}
         fill="var(--fg)"
       >
         {v.toFixed(1)}%

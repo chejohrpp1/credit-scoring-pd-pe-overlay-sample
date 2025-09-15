@@ -7,7 +7,13 @@ import {
   CategoryKey,
   inferFieldKind,
   matchRangeGetBeta,
+  SelectLevel,
 } from "@/app/helpers/overlay/factors";
+
+
+type InputValue = number | SelectLevel;
+// removed unused InputMap type
+
 
 // Utilidades de formato
 const fmtQ = (n: number) =>
@@ -53,7 +59,7 @@ function defaultValueFor(kind: ReturnType<typeof inferFieldKind>) {
 export default function OverlayPage() {
   // Construye estado por categoría/variable
   const [inputs, setInputs] = useState(() => {
-    const obj: Record<string, any> = {};
+    const obj: Record<string, InputValue> = {};
     for (const cat of FACTOR_SCHEMA) {
       for (const v of cat.Variables) {
         const k = `${cat.Categoria}::${v.Variable}`;
@@ -67,34 +73,33 @@ export default function OverlayPage() {
   const [peBase, setPeBase] = useState<number>(7537.50);
   const [peBaseDisplay, setPeBaseDisplay] = useState<string>("7537.50");
 
+
+  type Detail = { name: string; beta: number; value: InputValue };
+  type PerCat = { factor: number; details: Detail[] };
+  type PerCategoryMap = Record<CategoryKey, PerCat>;
+
   // Calcula factores por categoría: 1 + Σ(beta_i * valor_i)
   const perCategory = useMemo(() => {
-    const out: Record<
-      CategoryKey,
-      {
-        factor: number;
-        details: Array<{ name: string; beta: number; value: number | string }>;
-      }
-    > = {} as any;
+    const out = {} as PerCategoryMap;
     for (const cat of FACTOR_SCHEMA) {
       let sum = 0;
       const details: Array<{
         name: string;
         beta: number;
-        value: number | string;
+        value: InputValue;
       }> = [];
       for (const v of cat.Variables) {
         const key = `${cat.Categoria}::${v.Variable}`;
         const kind = inferFieldKind(v);
         const raw = inputs[key];
-        const beta = matchRangeGetBeta(v, raw);
+        const beta = matchRangeGetBeta(v, raw as number | string);
         // valor para multiplicación: percent -> fracción, amount/index -> número, select -> 1
         const value =
-          kind === "percent"
-            ? Number(raw) || 0
-            : kind === "select"
+          kind === 'percent'
+            ? (typeof raw === 'number' ? raw : Number(raw) || 0)
+            : kind === 'select'
             ? 1
-            : Number(raw) || 0;
+            : (typeof raw === 'number' ? raw : Number(raw) || 0);
         // Nota: para índices/montos sin unidad % el efecto es sólo el beta (value=1). Cambia aquí si quieres otra normalización.
         const valForCalc = kind === "amount" ? 1 : value;
         sum += beta * valForCalc;
@@ -115,8 +120,8 @@ export default function OverlayPage() {
     [peBase, factorProducto]
   );
 
-  const set = (key: string) => (val: any) =>
-    setInputs((prev) => ({ ...prev, [key]: val }));
+  const set = (key: string) => (val: number | string) =>
+    setInputs((prev) => ({ ...prev, [key]: val as InputValue }));
 
   const handlePeBaseChange = (value: string) => {
     const validation = validateNumericInput(value);
@@ -267,7 +272,6 @@ export default function OverlayPage() {
               {FACTOR_SCHEMA.flatMap((cat) =>
                 cat.Variables.map((v) => {
                   const key = `${cat.Categoria}::${v.Variable}`;
-                  const beta = matchRangeGetBeta(v, inputs[key]);
                   return (
                     <tr key={key}>
                       <td>{cat.Categoria}</td>

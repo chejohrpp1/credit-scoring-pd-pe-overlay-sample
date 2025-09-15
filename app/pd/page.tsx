@@ -121,7 +121,7 @@ export default function PDPage() {
               <Info className="w-4 h-4" /> Probabilidad de Default
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-              <div className="h-56">
+              <div className="h-56 flex items-center justify-center">
                 <Gauge value={pd} threshold={80} />
               </div>
               <div>
