@@ -36,7 +36,7 @@ export function FactorField({
   helper, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: {
   label: string;
-  kind: "percent" | "amount" | "select";
+  kind: "percent" | "amount" | "select" | "equation";
   value: number | string;
   onChange: (v: number | string) => void;
   helper?: string;
@@ -92,9 +92,9 @@ export function FactorField({
             inputMode="decimal"
             value={displayValue}
             onChange={(e) => handleNumericChange(e.target.value)}
-            placeholder={kind === "percent" ? "0.00" : "0"}
+            placeholder={kind === "percent" || "equation" ? "0.00" : "0"}
           />
-          {kind === "percent" ? (
+          {kind === "percent" || "equation" ? (
             <Percent className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 opacity-70" />
           ) : (
             <span className="text-xs font-medium absolute right-2 top-1/2 -translate-y-1/2 opacity-70">Q.</span>

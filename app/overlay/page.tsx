@@ -51,6 +51,7 @@ function validateNumericInput(value: string): {
 
 // Estado inicial por variable (por tipo)
 function defaultValueFor(kind: ReturnType<typeof inferFieldKind>) {
+  if (kind === "equation") return 70; // como fracción 0..1
   if (kind === "percent") return 0; // como fracción 0..1
   if (kind === "amount") return 0; // Quetzales o índice
   return "Medio"; // select
@@ -58,12 +59,14 @@ function defaultValueFor(kind: ReturnType<typeof inferFieldKind>) {
 
 export default function OverlayPage() {
   // Construye estado por categoría/variable
-  const [inputs, setInputs] = useState(() => {
-    const obj: Record<string, InputValue> = {};
+  const [inputs, setInputs] = useState<Record<string, string | number>>(() => {
+    const obj: Record<string, string | number> = {};
     for (const cat of FACTOR_SCHEMA) {
       for (const v of cat.Variables) {
-        const k = `${cat.Categoria}::${v.Variable}`;
-        obj[k] = defaultValueFor(inferFieldKind(v));
+        const key = `${cat.Categoria}::${v.Variable}`;
+        const kind = inferFieldKind(v);
+        // si el esquema trae Default, úsalo; si no, usa el default por tipo
+        obj[key] = ('Default' in v && v.Default !== undefined) ? v.Default : defaultValueFor(kind);
       }
     }
     return obj;
@@ -92,18 +95,26 @@ export default function OverlayPage() {
         const key = `${cat.Categoria}::${v.Variable}`;
         const kind = inferFieldKind(v);
         const raw = inputs[key];
-        const beta = matchRangeGetBeta(v, raw as number | string);
-        // valor para multiplicación: percent -> fracción, amount/index -> número, select -> 1
+        //const rawNum = typeof raw === 'number' ? raw : Number(raw) || 0;
+        const beta = matchRangeGetBeta(v, raw as number | string); //return decimal
+        let contribution = 0;
+        if ( kind === "equation"){
+          contribution = beta;
+          
+        } else {
+          // valor para multiplicación: percent -> fracción, amount/index -> número, select -> 1
         const value =
-          kind === 'percent'
-            ? (typeof raw === 'number' ? raw : Number(raw) || 0)
-            : kind === 'select'
-            ? 1
-            : (typeof raw === 'number' ? raw : Number(raw) || 0);
+        kind === 'percent'
+          ? (typeof raw === 'number' ? raw : Number(raw) || 0)
+          : kind === 'select'
+          ? 1
+          : (typeof raw === 'number' ? raw : Number(raw) || 0);
+          const valForCalc = kind === "amount" ? 1 : value;
+          contribution = beta * valForCalc
+        }
         // Nota: para índices/montos sin unidad % el efecto es sólo el beta (value=1). Cambia aquí si quieres otra normalización.
-        const valForCalc = kind === "amount" ? 1 : value;
-        sum += beta * valForCalc;
-        details.push({ name: v.Variable, beta, value: raw });
+        sum += contribution;
+        details.push({ name: v.Variable, beta, value: raw as InputValue });
       }
       const factor = 1 + sum;
       out[cat.Categoria as CategoryKey] = { factor, details };
@@ -239,7 +250,7 @@ export default function OverlayPage() {
                       4
                     ) ?? "1.0000"}
                   </b>
-                  {i < FACTOR_SCHEMA.length - 1 && " ×"}{" "}
+                  {i < FACTOR_SCHEMA.length - 1}{" "}
                 </span>
               ))}
             </div>

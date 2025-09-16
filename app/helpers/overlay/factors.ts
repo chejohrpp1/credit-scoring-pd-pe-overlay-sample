@@ -1,15 +1,15 @@
-export type SelectLevel = 'Bajo' | 'Medio' | 'Alto';
+export type SelectLevel = "Bajo" | "Medio" | "Alto";
 
 export type VariableRange = Readonly<{ Rango: string; Ponderador: string }>;
 export type VariableDef = Readonly<{
   Variable: string;
   Rangos: ReadonlyArray<VariableRange>;
+  Default?: string | number;
 }>;
 export type CategoryDef = Readonly<{
   Categoria: CategoryKey;
   Variables: ReadonlyArray<VariableDef>;
 }>;
-
 
 export type CategoryKey =
   | "Entorno Económico Nacional"
@@ -21,29 +21,16 @@ export const FACTOR_SCHEMA = [
   {
     Categoria: "Entorno Económico Nacional",
     Variables: [
+      
       {
-        Variable: "Tasa de Inflación Anual (%)",
-        Rangos: [
-          { Rango: "< 3%", Ponderador: "1.0%" },
-          { Rango: "3% - 5%", Ponderador: "0.5%" },
-          { Rango: "> 5%", Ponderador: "2.0%" },
-        ],
+        Variable: "Tasa de remesas nacional (0-100)", //-0.1125 * X  + 0.0306
+        Default: 20,
+        Rangos: [{ Rango: "equation", Ponderador: "-0.1125*value_i+0.0306" }],
       },
       {
-        Variable: "Tasa de Desempleo Nacional (%)",
-        Rangos: [
-          { Rango: "< 10%", Ponderador: "0.5%" },
-          { Rango: "10% - 20%", Ponderador: "0.7%" },
-          { Rango: "> 20%", Ponderador: "1.5%" },
-        ],
-      },
-      {
-        Variable: "Crecimiento del PIB Real (%)",
-        Rangos: [
-          { Rango: "< 2%", Ponderador: "0.3%" },
-          { Rango: "2% - 3%", Ponderador: "0.4%" },
-          { Rango: "> 3%", Ponderador: "0.5%" },
-        ],
+        Variable: "Crecimiento del PIB Real (0-100)", //- 0.6244 * X  +  0.05
+        Default: 3.5,
+        Rangos: [{ Rango: "equation", Ponderador: "-0.6244*value_i+0.05" }],
       },
     ],
   },
@@ -51,27 +38,13 @@ export const FACTOR_SCHEMA = [
     Categoria: "Entorno Regional",
     Variables: [
       {
-        Variable: "Dependencia de Remesas (% de Ingresos Regionales)",
+        Variable: "Tasa de Inflación regional (0-100)", //26.086 * (X^2)   - 1.6287 * X    + 0.0308
+        Default: 2,
         Rangos: [
-          { Rango: "< 10%", Ponderador: "1.2%" },
-          { Rango: "10% - 15%", Ponderador: "0.6%" },
-          { Rango: "> 15%", Ponderador: "0.4%" },
-        ],
-      },
-      {
-        Variable: "Índice de Conflictos Comunitarios (1-5)",
-        Rangos: [
-          { Rango: "Bajo", Ponderador: "0.3%" },
-          { Rango: "Medio", Ponderador: "0.5%" },
-          { Rango: "Alto", Ponderador: "1.0%" },
-        ],
-      },
-      {
-        Variable: "Diversificación de Ingresos (Índice HHI, 0-10,000)",
-        Rangos: [
-          { Rango: "< 1,500", Ponderador: "0.3%" },
-          { Rango: "1500 - 3000", Ponderador: "0.4%" },
-          { Rango: "> 3000", Ponderador: "0.8%" },
+          {
+            Rango: "equation",
+            Ponderador: "26.086*(value_i^2) - 1.6287*value_i + 0.0308",
+          },
         ],
       },
     ],
@@ -80,20 +53,14 @@ export const FACTOR_SCHEMA = [
     Categoria: "Gobierno Cooperativo",
     Variables: [
       {
-        Variable: "Tasa de Cobranza Efectiva (% de Cartera Recuperada)",
-        Rangos: [
-          { Rango: "< 80%", Ponderador: "0.2%" },
-          { Rango: "80% - 90%", Ponderador: "0.1%" },
-          { Rango: "> 90%", Ponderador: "0.2%" },
-        ],
+        Variable: "Calificación de gobierno cooperativo (0-100)", //agregar restriccion de 0-100
+        Default: 60,
+        Rangos: [{ Rango: "equation", Ponderador: "-0.012*value_i+0.023" }],
       },
       {
-        Variable: "Índice de Cumplimiento de Políticas (1-5)",
-        Rangos: [
-          { Rango: "Bajo", Ponderador: "0.3%" },
-          { Rango: "Medio", Ponderador: "0.5%" },
-          { Rango: "Alto", Ponderador: "1.0%" },
-        ],
+        Variable: "Índice de compliance (0-100)", //agregar restriccion de 0-100
+        Default: 80,
+        Rangos: [{ Rango: "equation", Ponderador: "-0.012*value_i+0.023" }],
       },
     ],
   },
@@ -101,37 +68,24 @@ export const FACTOR_SCHEMA = [
     Categoria: "Entorno Financiero",
     Variables: [
       {
-        Variable: "Tasa de Morosidad del Sistema (%)",
+        Variable: "Tasa de Morosidad del Sistema (%)", //value_i/100 * 0.7436
+        Default: 2.8,
         Rangos: [
-          { Rango: "< 1%", Ponderador: "1.5%" },
-          { Rango: "1% - 2%", Ponderador: "0.7%" },
-          { Rango: "> 2%", Ponderador: "1.5%" },
-        ],
-      },
-      {
-        Variable: "Crecimiento del Ahorro Captado (% anual)",
-        Rangos: [
-          { Rango: "< 5%", Ponderador: "0.4%" },
-          { Rango: "5% - 7%", Ponderador: "0.2%" },
-          { Rango: "> 7%", Ponderador: "0.1%" },
-        ],
-      },
-      {
-        Variable: "Concentración de Cartera (% en Top 5 Sectores)",
-        Rangos: [
-          { Rango: "< 20%", Ponderador: "1.0%" },
-          { Rango: "20% - 30%", Ponderador: "0.5%" },
-          { Rango: "> 30%", Ponderador: "1.0%" },
+          { Rango: "< 1%", Ponderador: "0.7436%" },
+          { Rango: "> 1%", Ponderador: "0.7436%" },
         ],
       },
     ],
   },
 ] as const;
 
-export function inferFieldKind(v: {
-  Variable: string;
-  Rangos: ReadonlyArray<{ Rango: string; Ponderador: string }>;
-}): "percent" | "amount" | "select" {
+export function inferFieldKind(
+  v: Readonly<VariableDef>
+): "percent" | "amount" | "select" | "equation" {
+  // si tiene un rango 'equation' → tratamos como ecuación
+  if (v.Rangos.some((r) => r.Rango.toLowerCase() === "equation"))
+    return "equation";
+
   const name = v.Variable.toLowerCase();
   if (name.includes("%")) return "percent";
   if (
@@ -140,7 +94,6 @@ export function inferFieldKind(v: {
     name.includes("quetzales")
   )
     return "amount";
-  // cuando los rangos son Bajo/Medio/Alto explícitos
   const hasBMA = v.Rangos.some((r) =>
     ["bajo", "medio", "alto"].includes(r.Rango.toLowerCase())
   );
@@ -151,12 +104,66 @@ export function inferFieldKind(v: {
 export const parsePctStr = (s: string) =>
   Number(s.replace("%", "").replace(",", ".")) / 100;
 
+// Normaliza el valor de entrada según si la variable es porcentaje
+function normalizeValueFor(
+  v: Readonly<VariableDef>,
+  raw: number | string
+): number {
+  const val = typeof raw === "number" ? raw : Number(raw) || 0;
+  const isPercentVar = v.Variable.toLowerCase().includes("%");
+  // Si la variable es %, interpretamos el input como 0..100 y lo pasamos a 0..1
+  return isPercentVar ? val / 100 : val / 100;
+}
+
+// -------------- evaluar ecuación 'a*value_i + b' --------------
+function evalLinearExpr(expr: string, value: number): number {
+  // acepta: "-0.012*value_i+0.023"  ó  "-0.012*value_i+2.3%"
+  const cleaned = expr.replace(/\s+/g, "");
+  const m = cleaned.match(/^([+-]?\d*\.?\d+)\*value_i([+-]\d*\.?\d+%?)$/i);
+  if (!m) return 0;
+  const a = parseFloat(m[1]); // -0.012
+  const bStr = m[2]; // +0.023  ó +2.3%
+  const b = bStr.includes("%") ? parsePctStr(bStr) : parseFloat(bStr);
+  return a * value + b; // devuelve decimal (p.ej 0.011)
+}
+
+// Evalúa ecuación cuadrática:  a*(value_i^2) + b*value_i + c   (c puede venir en %)
+function evalQuadraticExpr(expr: string, value: number): number {
+  const cleaned = expr.replace(/\s+/g, "").toLowerCase();
+  // Soportar paréntesis opcionales alrededor de value_i^2
+  // Formato esperado: a*(value_i^2)+b*value_i+c
+  const quad = cleaned.match(
+    /^([+-]?\d*\.?\d+)\*\(?value_i\^2\)?([+-]\d*\.?\d+)\*value_i([+-]\d*\.?\d+%?)$/
+  );
+  if (!quad) return 0;
+  const a = parseFloat(quad[1]);
+  const b = parseFloat(quad[2]);
+  const cStr = quad[3];
+  const c = cStr.includes("%") ? parsePctStr(cStr) : parseFloat(cStr);
+  return a * value * value + b * value + c;
+}
+
 // Coincide el valor con el rango textual y retorna beta (decimal)
 export function matchRangeGetBeta(
-  v: { Variable: string; Rangos: ReadonlyArray<{ Rango: string; Ponderador: string }> },
+  v: {
+    Variable: string;
+    Rangos: ReadonlyArray<{ Rango: string; Ponderador: string }>;
+  },
   raw: number | string
 ): number {
   const kind = inferFieldKind(v);
+
+  if (kind === "equation") {
+    const expr =
+      v.Rangos.find((r) => r.Rango.toLowerCase() === "equation")?.Ponderador ??
+      "";
+    const x = normalizeValueFor(v, raw);
+    // si incluye value_i^2 → cuadrática; si no → lineal
+    return /value_i\^2/i.test(expr)
+      ? evalQuadraticExpr(expr, x)
+      : evalLinearExpr(expr, x);
+  }
+
   // Select directo por etiqueta
   if (kind === "select") {
     const found = v.Rangos.find(
