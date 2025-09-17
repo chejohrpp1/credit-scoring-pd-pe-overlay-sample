@@ -22,7 +22,7 @@ const mapGarantia = {
 } as const; // según tu especificación
 
 const COEF = {
-  intercepto: -1.97,
+  intercepto: -3.97,
   monto: 0.36 / 100000, // a mayor monto (Q), menor PD (de ejemplo)
   buro: 0.1, // peores letras aumentan PD
   endeudamiento: 5.46 / 100, // % 0..100
@@ -41,7 +41,7 @@ function computePD(input: FormState) {
     COEF.monto * (input.monto || 0) +
     COEF.buro * mapBuro[input.buro] +
     COEF.endeudamiento * (input.endeudamiento || 0) +
-    COEF.ingresos * (input.ingresos || 0) +
+    (input.endeudamiento < 70 ? COEF.ingresos * (input.ingresos || 0) : 0) +
     (typeof COEF.edad === "function" ? COEF.edad(input.edad || 0) : COEF.edad * (input.edad || 0)) + //change into to function
     COEF.sexo * mapSexo[input.sexo] + 
     (typeof COEF.antiguedad === "function" ? COEF.antiguedad(input.antiguedad || 0) : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range

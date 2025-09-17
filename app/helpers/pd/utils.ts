@@ -49,6 +49,7 @@ const evalQuadraticExpr = (expr: string, value: number): number => {
   const b = parseFloat(quad[2]);
   const cStr = quad[3];
   const c = cStr.includes("%") ? parsePctStr(cStr) : parseFloat(cStr);
+  console.log(a * value * value + b * value + c)
   return a * value * value + b * value + c;
 };
 
