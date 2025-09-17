@@ -52,7 +52,7 @@ export function Sidebar({
       >
         <div className="flex items-center gap-2 mb-2">
           <PanelsTopLeft className="w-5 h-5" />
-          <div className="font-semibold">FG MICOOPE – Suite</div>
+          <div className="font-semibold">FG MICOOPE – Simulador</div>
         </div>
         <div className="flex justify-center mb-4">
               <Image
@@ -86,7 +86,7 @@ export function Sidebar({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PanelsTopLeft className="w-5 h-5" />
-              <div className="font-semibold">FG MICOOPE – Suite</div>
+              <div className="font-semibold">FG MICOOPE – Simulador</div>
             </div>
             <button
               aria-label="Cerrar menú"

@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Menu className="w-5 h-5" />
             </button>
             <Link href="/pd" className="text-sm font-semibold">
-              FG MICOOPE – Suite
+              FG MICOOPE – Simulador
             </Link>
             <div className="w-9" />
           </div>
