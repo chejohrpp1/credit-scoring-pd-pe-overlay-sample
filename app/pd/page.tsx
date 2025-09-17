@@ -41,7 +41,7 @@ function computePD(input: FormState) {
     COEF.monto * (input.monto || 0) +
     COEF.buro * mapBuro[input.buro] +
     COEF.endeudamiento * (input.endeudamiento || 0) +
-    (input.endeudamiento < 70 ? COEF.ingresos * (input.ingresos || 0) : 0) +
+    (input.endeudamiento <= 70 ? COEF.ingresos * (input.ingresos || 0) : 0) +
     (typeof COEF.edad === "function" ? COEF.edad(input.edad || 0) : COEF.edad * (input.edad || 0)) + //change into to function
     COEF.sexo * mapSexo[input.sexo] + 
     (typeof COEF.antiguedad === "function" ? COEF.antiguedad(input.antiguedad || 0) : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
@@ -91,6 +91,7 @@ export default function PDPage() {
   // display strings for numeric inputs so users can clear and see placeholders
   const [displayMonto, setDisplayMonto] = useState<string>("250000");
   const [displayIngresos, setDisplayIngresos] = useState<string>("6000");
+  const [displayEndeudamiento, setDisplayEndeudamiento] = useState<string>("15");
   const [displayEdad, setDisplayEdad] = useState<string>("23");
   const [displayAntiguedad, setDisplayAntiguedad] = useState<string>("4");
 
@@ -141,6 +142,7 @@ export default function PDPage() {
     const setDisplay = (val: string) => {
       if (key === "monto") setDisplayMonto(val);
       if (key === "ingresos") setDisplayIngresos(val);
+      if (key === "endeudamiento") setDisplayEndeudamiento(val);
       if (key === "edad") setDisplayEdad(val);
       if (key === "antiguedad") setDisplayAntiguedad(val);
     };
@@ -267,19 +269,12 @@ export default function PDPage() {
               <div className="label mb-1">Grado de Endeudamiento (%)</div>
               <input
                 className="input"
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={f.endeudamiento}
-                onChange={(e) => setClamped("endeudamiento", e.target.value, 0, 100, "Endeudamiento (%)")}
+                type="text"
+                inputMode="decimal"
+                value={displayEndeudamiento}
+                onChange={(e) => handleNumericChange("endeudamiento", "Endeudamiento (%)", e.target.value, 0, 100)}
+                placeholder="0.00"
               />
-              <div
-                className="text-xs mt-1"
-                style={{ color: "var(--fg-muted)" }}
-              >
-                {f.endeudamiento}%
-              </div>
             </div>
 
             <div>
