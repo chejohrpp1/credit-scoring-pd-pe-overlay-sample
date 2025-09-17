@@ -11,10 +11,8 @@ import {
 } from "@/app/helpers/overlay/factors";
 import { toast } from "react-toastify";
 
-
 type InputValue = number | SelectLevel;
 // removed unused InputMap type
-
 
 // Utilidades de formato
 const fmtQ = (n: number) =>
@@ -67,16 +65,18 @@ export default function OverlayPage() {
         const key = `${cat.Categoria}::${v.Variable}`;
         const kind = inferFieldKind(v);
         // si el esquema trae Default, úsalo; si no, usa el default por tipo
-        obj[key] = ('Default' in v && v.Default !== undefined) ? v.Default : defaultValueFor(kind);
+        obj[key] =
+          "Default" in v && v.Default !== undefined
+            ? v.Default
+            : defaultValueFor(kind);
       }
     }
     return obj;
   });
 
   // PE base (traída de /pe o ingresada aquí manualmente)
-  const [peBase, setPeBase] = useState<number>(7537.50);
+  const [peBase, setPeBase] = useState<number>(7537.5);
   const [peBaseDisplay, setPeBaseDisplay] = useState<string>("7537.50");
-
 
   type Detail = { name: string; beta: number; value: InputValue };
   type PerCat = { factor: number; details: Detail[] };
@@ -99,19 +99,22 @@ export default function OverlayPage() {
         //const rawNum = typeof raw === 'number' ? raw : Number(raw) || 0;
         const beta = matchRangeGetBeta(v, raw as number | string); //return decimal
         let contribution = 0;
-        if ( kind === "equation"){
+        if (kind === "equation") {
           contribution = beta;
-          
         } else {
           // valor para multiplicación: percent -> fracción, amount/index -> número, select -> 1
-        const value =
-        kind === 'percent'
-          ? (typeof raw === 'number' ? raw : Number(raw) || 0)
-          : kind === 'select'
-          ? 1
-          : (typeof raw === 'number' ? raw : Number(raw) || 0);
+          const value =
+            kind === "percent"
+              ? typeof raw === "number"
+                ? raw
+                : Number(raw) || 0
+              : kind === "select"
+              ? 1
+              : typeof raw === "number"
+              ? raw
+              : Number(raw) || 0;
           const valForCalc = kind === "amount" ? 1 : value;
-          contribution = beta * valForCalc
+          contribution = beta * valForCalc;
         }
         // Nota: para índices/montos sin unidad % el efecto es sólo el beta (value=1). Cambia aquí si quieres otra normalización.
         sum += contribution;
@@ -156,10 +159,10 @@ export default function OverlayPage() {
 
   const handlePeBaseChange = (value: string) => {
     const validation = validateNumericInput(value);
-    
+
     // Update display value
     setPeBaseDisplay(validation.displayValue);
-    
+
     // Only update the actual value if it's valid
     if (validation.numericValue > 0 || value === "" || value === "0") {
       // Apply clamping for PE base (0 to 100000000)
@@ -239,7 +242,7 @@ export default function OverlayPage() {
                 >
                   <div className="text-sm font-semibold mb-1">
                     {cat.Categoria}
-                  </div>  
+                  </div>
                   <div className="mt-4 text-md">
                     Factor total: <b>{c ? c.factor.toFixed(4) : "1.0000"}</b>
                   </div>
@@ -257,7 +260,9 @@ export default function OverlayPage() {
         <div className="grid grid-cols-1 md:grid-cols-[260px_auto] items-center gap-6">
           {/* PE base */}
           <div>
-            <div className="label mb-1">PE (Pérdida Esperada de la cartera)</div>
+            <div className="label mb-1">
+              PE (Pérdida Esperada de la cartera)
+            </div>
             <input
               className="input"
               type="text"
@@ -266,6 +271,9 @@ export default function OverlayPage() {
               onChange={(e) => handlePeBaseChange(e.target.value)}
               placeholder="0.00"
             />
+            <div className="text-xs mt-1" style={{ color: "var(--fg-muted)" }}>
+              {fmtQ(Number(peBaseDisplay))}
+            </div>
           </div>
 
           {/* Factores */}
@@ -309,9 +317,15 @@ export default function OverlayPage() {
           <table className="table w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th><p className="text-white">Categoría</p></th>
-                <th><p className="text-white">Variable</p></th>
-                <th><p className="text-white">Valor</p></th>
+                <th>
+                  <p className="text-white">Categoría</p>
+                </th>
+                <th>
+                  <p className="text-white">Variable</p>
+                </th>
+                <th>
+                  <p className="text-white">Valor</p>
+                </th>
               </tr>
             </thead>
             <tbody>

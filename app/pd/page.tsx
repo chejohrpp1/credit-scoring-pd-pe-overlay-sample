@@ -3,12 +3,21 @@ import { useMemo, useState } from "react";
 import { Info, Sparkles } from "lucide-react";
 import { Gauge } from "../components/Gauge";
 import Image from "next/image";
-import { calculateEdadCOEF, calculateIncomeCOEF, evaluateAntiguedadRangeCOEF } from "../helpers/pd/utils";
+import {
+  calculateEdadCOEF,
+  calculateIncomeCOEF,
+  evaluateAntiguedadRangeCOEF,
+} from "../helpers/pd/utils";
 import { toast } from "react-toastify";
+import { fmtQ } from "../helpers/components/utils";
 
 const mapBuro = { A: 0, B: 1, C: 2, D: 3, E: 4 } as const;
 const mapSexo = { Masculino: 0, Femenino: 1 } as const;
-const mapEmpleo = { "Formal dependiente": 0, "Formal Independiente": 1, Informal: 2 } as const;
+const mapEmpleo = {
+  "Formal dependiente": 0,
+  "Formal Independiente": 1,
+  Informal: 2,
+} as const;
 const mapUso = {
   Productivos: 1,
   Educación: 2,
@@ -43,12 +52,16 @@ function computePD(input: FormState) {
     COEF.endeudamiento * (input.endeudamiento || 0) +
     (input.endeudamiento <= 70
       ? input.ingresos > 5000
-        ? 1 / (COEF.ingresos * ((input.monto / input.ingresos)))
+        ? 1 / (COEF.ingresos * (input.monto / input.ingresos))
         : calculateIncomeCOEF(input.ingresos)
       : 0) +
-    (typeof COEF.edad === "function" ? COEF.edad(input.edad || 0) : COEF.edad * (input.edad || 0)) + //change into to function
-    COEF.sexo * mapSexo[input.sexo] + 
-    (typeof COEF.antiguedad === "function" ? COEF.antiguedad(input.antiguedad || 0) : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
+    (typeof COEF.edad === "function"
+      ? COEF.edad(input.edad || 0)
+      : COEF.edad * (input.edad || 0)) + //change into to function
+    COEF.sexo * mapSexo[input.sexo] +
+    (typeof COEF.antiguedad === "function"
+      ? COEF.antiguedad(input.antiguedad || 0)
+      : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
     COEF.empleo * mapEmpleo[input.empleo] +
     COEF.uso * mapUso[input.uso] +
     COEF.garantia * mapGarantia[input.garantia];
@@ -56,13 +69,12 @@ function computePD(input: FormState) {
   // Escalamos a 0..100 y limitamos. Ajusta a tu ecuación real.
   const raw = x;
   const pd = Math.max(0, Math.min(100, calculateValue(raw)));
-  return pd*100;
+  return pd * 100;
 }
 
 function calculateValue(m15: number): number {
-    return 1 - 1 / (1 + Math.exp(m15));
-  }
-  
+  return 1 - 1 / (1 + Math.exp(m15));
+}
 
 // === Estado de formulario ===
 export type FormState = {
@@ -86,7 +98,7 @@ export default function PDPage() {
     ingresos: 6000,
     edad: 32,
     sexo: "Masculino",
-    antiguedad: 4,  
+    antiguedad: 4,
     empleo: "Formal dependiente",
     uso: "Consumo",
     garantia: "Prendaria/Prenda",
@@ -95,7 +107,8 @@ export default function PDPage() {
   // display strings for numeric inputs so users can clear and see placeholders
   const [displayMonto, setDisplayMonto] = useState<string>("250000");
   const [displayIngresos, setDisplayIngresos] = useState<string>("6000");
-  const [displayEndeudamiento, setDisplayEndeudamiento] = useState<string>("15");
+  const [displayEndeudamiento, setDisplayEndeudamiento] =
+    useState<string>("15");
   const [displayEdad, setDisplayEdad] = useState<string>("32");
   const [displayAntiguedad, setDisplayAntiguedad] = useState<string>("4");
 
@@ -146,7 +159,9 @@ export default function PDPage() {
     }
     const clamped = Math.max(min, Math.min(max, parsed));
     if (clamped !== parsed) {
-      toast.info(`${label} ajustado a ${clamped} (rango permitido ${min}-${max})`);
+      toast.info(
+        `${label} ajustado a ${clamped} (rango permitido ${min}-${max})`
+      );
     }
     setDisplay(clamped.toString());
     setF((prev) => ({ ...prev, [key]: clamped }));
@@ -155,7 +170,9 @@ export default function PDPage() {
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Predictor de Riesgo individual (Probabilidad de Default)</h1>
+        <h1 className="text-2xl font-semibold">
+          Predictor de Riesgo individual (Probabilidad de Default)
+        </h1>
         <button className="btn">
           <Sparkles className="w-4 h-4" /> Predecir
         </button>
@@ -163,7 +180,6 @@ export default function PDPage() {
 
       {/* Resultado */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:[grid-template-columns:1fr_400px] lg:auto-rows-fr gap-6 items-start">
-
         <div className="flex flex-col gap-5">
           <section className="card">
             <div className="text-sm label mb-2 flex items-center gap-2">
@@ -187,14 +203,15 @@ export default function PDPage() {
                     {pd.toFixed(2)}%
                   </li>
                   <li>
-                    <span className="label">Optimizado:</span> Utilizando las 10 características más importantes
+                    <span className="label">Optimizado:</span> Utilizando las 10
+                    características más importantes
                   </li>
                 </ul>
               </div>
             </div>
           </section>
           <section className="card">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-center">
               <div className="flex items-center justify-center">
                 <Image
                   src="/images/lu_face.png"
@@ -205,14 +222,13 @@ export default function PDPage() {
                 />
               </div>
               <div className="text-xl font-semibold flex items-center gap-2">
-                  <span
-                    className="inline-block w-2 h-2 rounded-full"
-                    style={{ background: level.color }}
-                  />{" "}
-                  PD: {pd.toFixed(2)}%
-                </div>
+                <span
+                  className="inline-block w-2 h-2 rounded-full"
+                  style={{ background: level.color }}
+                />{" "}
+                PD: {pd.toFixed(2)}%
+              </div>
             </div>
-
           </section>
         </div>
 
@@ -230,9 +246,23 @@ export default function PDPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayMonto}
-                onChange={(e) => handleNumericChange("monto", "Monto", e.target.value, 0, 100000000)}
+                onChange={(e) =>
+                  handleNumericChange(
+                    "monto",
+                    "Monto",
+                    e.target.value,
+                    0,
+                    1000000
+                  )
+                }
                 placeholder="0.00"
               />
+              <div
+                className="text-xs mt-1"
+                style={{ color: "var(--fg-muted)" }}
+              >
+                {fmtQ(Number(displayMonto))}
+              </div>
             </div>
 
             <div>
@@ -257,7 +287,15 @@ export default function PDPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayEndeudamiento}
-                onChange={(e) => handleNumericChange("endeudamiento", "Endeudamiento (%)", e.target.value, 0, 100)}
+                onChange={(e) =>
+                  handleNumericChange(
+                    "endeudamiento",
+                    "Endeudamiento (%)",
+                    e.target.value,
+                    0,
+                    100
+                  )
+                }
                 placeholder="0.00"
               />
             </div>
@@ -269,9 +307,23 @@ export default function PDPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayIngresos}
-                onChange={(e) => handleNumericChange("ingresos", "Ingresos", e.target.value, 1, 100000000)}
+                onChange={(e) =>
+                  handleNumericChange(
+                    "ingresos",
+                    "Ingresos",
+                    e.target.value,
+                    1,
+                    100000000
+                  )
+                }
                 placeholder="0.00"
               />
+              <div
+                className="text-xs mt-1"
+                style={{ color: "var(--fg-muted)" }}
+              >
+                {fmtQ(Number(displayIngresos))}
+              </div>
             </div>
 
             <div>
@@ -281,7 +333,9 @@ export default function PDPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayEdad}
-                onChange={(e) => handleNumericChange("edad", "Edad", e.target.value, 0, 101)}
+                onChange={(e) =>
+                  handleNumericChange("edad", "Edad", e.target.value, 0, 101)
+                }
                 placeholder="0"
               />
             </div>
@@ -302,13 +356,21 @@ export default function PDPage() {
             </div>
 
             <div>
-              <div className="label mb-1">Antigüedad empleo (años)</div>
+              <div className="label mb-1">Antigüedad laboral (años)</div>
               <input
                 className="input"
                 type="text"
                 inputMode="decimal"
                 value={displayAntiguedad}
-                onChange={(e) => handleNumericChange("antiguedad", "Antigüedad", e.target.value, 0, 30)}
+                onChange={(e) =>
+                  handleNumericChange(
+                    "antiguedad",
+                    "Antigüedad",
+                    e.target.value,
+                    0,
+                    30
+                  )
+                }
                 placeholder="0"
               />
             </div>
@@ -384,8 +446,6 @@ export default function PDPage() {
             </button>
           </div>
         </section>
-
-        
       </div>
 
       {/* Tabla simple de variables actuales */}
@@ -395,14 +455,20 @@ export default function PDPage() {
           <table className="table w-full border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th><p className="text-white">Variable</p></th>
-                <th><p className="text-white">Valor</p></th>
+                <th>
+                  <p className="text-white">Variable</p>
+                </th>
+                <th>
+                  <p className="text-white">Valor</p>
+                </th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(f).map(([k, v]) => (
                 <tr key={k}>
-                  <td className="capitalize">{k === "buro" ? "Record crediticio" : k}</td>
+                  <td className="capitalize">
+                    {k === "buro" ? "Record crediticio" : k}
+                  </td>
                   <td>{String(v)}</td>
                 </tr>
               ))}

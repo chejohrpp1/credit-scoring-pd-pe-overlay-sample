@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Info, Calculator } from "lucide-react";
 import { toast } from "react-toastify";
 import { ELDonut } from "../components/ELDonut";
+import { fmtQ } from "../helpers/components/utils";
 
 // === Estado de formulario ===
 export type PEFormState = {
@@ -272,7 +273,7 @@ export default function PEPage() {
                 className="text-xs mt-1"
                 style={{ color: "var(--fg-muted)" }}
               >
-                Monto total expuesto
+                Monto total expuesto: {fmtQ(form.ead)}
               </div>
             </div>
           </div>

@@ -24,7 +24,7 @@ export const FACTOR_SCHEMA = [
     Variables: [
       
       {
-        Variable: "Tasa de remesas nacional (0-100)", //-0.1125 * X  + 0.0306
+        Variable: "Crecimiento de remesas nacional (%)", //-0.1125 * X  + 0.0306
         Default: 20,
         Rangos: [{ Rango: "equation", Ponderador: "-0.1125*value_i+0.0306" }],
         spanLabel: undefined,
@@ -41,7 +41,7 @@ export const FACTOR_SCHEMA = [
     Categoria: "Entorno Regional",
     Variables: [
       {
-        Variable: "Tasa de Inflación regional (0-100)", //26.086 * (X^2)   - 1.6287 * X    + 0.0308
+        Variable: "Inflación regional (%)", //26.086 * (X^2)   - 1.6287 * X    + 0.0308
         Default: 2,
         Rangos: [
           {
