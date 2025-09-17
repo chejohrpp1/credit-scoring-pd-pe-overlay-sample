@@ -30,7 +30,7 @@ export const FACTOR_SCHEMA = [
         spanLabel: undefined,
       },
       {
-        Variable: "Crecimiento del PIB Real (0-100)", //- 0.6244 * X  +  0.05
+        Variable: "Crecimiento del PIB Real (%)", //- 0.6244 * X  +  0.05
         Default: 3.5,
         Rangos: [{ Rango: "equation", Ponderador: "-0.6244*value_i+0.05" }],
         spanLabel: undefined,
@@ -57,13 +57,13 @@ export const FACTOR_SCHEMA = [
     Categoria: "Gobierno Cooperativo",
     Variables: [
       {
-        Variable: "Calificación de gobierno cooperativo (0-100)", //agregar restriccion de 0-100
+        Variable: "Calificación de gobernabilidad (0-100)", //agregar restriccion de 0-100
         Default: 60,
         Rangos: [{ Rango: "equation", Ponderador: "-0.012*value_i+0.023" }],
         spanLabel: "Pts.",
       },
       {
-        Variable: "Riesgo legal (0-100)", //agregar restriccion de 0-100
+        Variable: "Calificación de riesgo legal (0-100)", //agregar restriccion de 0-100
         Default: 80,
         Rangos: [{ Rango: "equation", Ponderador: "-0.012*value_i+0.023" }],
         spanLabel: "Pts.",
