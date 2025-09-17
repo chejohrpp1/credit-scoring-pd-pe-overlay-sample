@@ -88,6 +88,12 @@ export default function PDPage() {
     garantia: "Prendaria/Prenda",
   });
 
+  // display strings for numeric inputs so users can clear and see placeholders
+  const [displayMonto, setDisplayMonto] = useState<string>("250000");
+  const [displayIngresos, setDisplayIngresos] = useState<string>("6000");
+  const [displayEdad, setDisplayEdad] = useState<string>("23");
+  const [displayAntiguedad, setDisplayAntiguedad] = useState<string>("4");
+
   const pd = useMemo(() => computePD(f), [f]);
   const level =
     pd <= 3
@@ -122,6 +128,41 @@ export default function PDPage() {
       );
     }
     set(key)(clamped as FormState[K]);
+  };
+
+  // Text-input friendly numeric handler with clamping and display sync
+  const handleNumericChange = (
+    key: keyof FormState,
+    label: string,
+    raw: string,
+    min: number,
+    max: number
+  ) => {
+    const setDisplay = (val: string) => {
+      if (key === "monto") setDisplayMonto(val);
+      if (key === "ingresos") setDisplayIngresos(val);
+      if (key === "edad") setDisplayEdad(val);
+      if (key === "antiguedad") setDisplayAntiguedad(val);
+    };
+
+    // allow clearing and intermediate decimal typing
+    const cleaned = raw.replace(/[^0-9.,]/g, "");
+    if (cleaned === "" || cleaned.endsWith(".") || cleaned.endsWith(",")) {
+      setDisplay(cleaned);
+      return;
+    }
+    const normalized = cleaned.replace(",", ".");
+    const parsed = parseFloat(normalized);
+    if (Number.isNaN(parsed)) {
+      setDisplay(cleaned);
+      return;
+    }
+    const clamped = Math.max(min, Math.min(max, parsed));
+    if (clamped !== parsed) {
+      toast.info(`${label} ajustado a ${clamped} (rango permitido ${min}-${max})`);
+    }
+    setDisplay(clamped.toString());
+    setF((prev) => ({ ...prev, [key]: clamped }));
   };
 
   return (
@@ -199,11 +240,11 @@ export default function PDPage() {
               <div className="label mb-1">Monto (Q)</div>
               <input
                 className="input"
-                type="number"
-                min={0}
-                step={100}
-                value={f.monto}
-                onChange={(e) => setClamped("monto", e.target.value, 0, 100000000, "Monto")}
+                type="text"
+                inputMode="decimal"
+                value={displayMonto}
+                onChange={(e) => handleNumericChange("monto", "Monto", e.target.value, 0, 100000000)}
+                placeholder="0.00"
               />
             </div>
 
@@ -245,11 +286,11 @@ export default function PDPage() {
               <div className="label mb-1">Ingresos (Q)</div>
               <input
                 className="input"
-                type="number"
-                min={0}
-                step={100}
-                value={f.ingresos}
-                onChange={(e) => setClamped("ingresos", e.target.value, 0, 100000000, "Ingresos")}
+                type="text"
+                inputMode="decimal"
+                value={displayIngresos}
+                onChange={(e) => handleNumericChange("ingresos", "Ingresos", e.target.value, 0, 100000000)}
+                placeholder="0.00"
               />
             </div>
 
@@ -257,11 +298,11 @@ export default function PDPage() {
               <div className="label mb-1">Edad</div>
               <input
                 className="input"
-                type="number"
-                min={18}
-                max={101}
-                value={f.edad}
-                onChange={(e) => setClamped("edad", e.target.value, 0, 101, "Edad")}
+                type="text"
+                inputMode="decimal"
+                value={displayEdad}
+                onChange={(e) => handleNumericChange("edad", "Edad", e.target.value, 0, 101)}
+                placeholder="0"
               />
             </div>
 
@@ -284,11 +325,11 @@ export default function PDPage() {
               <div className="label mb-1">Antigüedad empleo (años)</div>
               <input
                 className="input"
-                type="number"
-                min={0}
-                max={30}
-                value={f.antiguedad}
-                onChange={(e) => setClamped("antiguedad", e.target.value, 0, 30, "Antigüedad")}
+                type="text"
+                inputMode="decimal"
+                value={displayAntiguedad}
+                onChange={(e) => handleNumericChange("antiguedad", "Antigüedad", e.target.value, 0, 30)}
+                placeholder="0"
               />
             </div>
 

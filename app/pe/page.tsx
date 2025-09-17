@@ -211,7 +211,6 @@ export default function PEPage() {
                 value={displayForm.pd}
                 onChange={(e) => updateFieldClamped("pd", e.target.value, 0, 100, "PD")}
                 placeholder="0.00"
-                //setclamped from 0 to 100
               />
             </div>
 
@@ -226,7 +225,6 @@ export default function PEPage() {
                 value={displayForm.lgd}
                 onChange={(e) => updateFieldClamped("lgd", e.target.value, 0, 100, "LGD")}
                 placeholder="0.00"
-                //setclamped from 0 to 100
               />
             </div>
 
