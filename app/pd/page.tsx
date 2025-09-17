@@ -3,12 +3,12 @@ import { useMemo, useState } from "react";
 import { Info, Sparkles } from "lucide-react";
 import { Gauge } from "../components/Gauge";
 import Image from "next/image";
-import { calculateEdadCOEF, evaluateAntiguedadRangeCOEF } from "../helpers/pd/utils";
+import { calculateEdadCOEF, calculateIncomeCOEF, evaluateAntiguedadRangeCOEF } from "../helpers/pd/utils";
 import { toast } from "react-toastify";
 
 const mapBuro = { A: 0, B: 1, C: 2, D: 3, E: 4 } as const;
 const mapSexo = { Masculino: 0, Femenino: 1 } as const;
-const mapEmpleo = { Formal: 0, Independiente: 1, Informal: 2 } as const;
+const mapEmpleo = { "Formal dependiente": 0, "Formal Independiente": 1, Informal: 2 } as const;
 const mapUso = {
   Productivos: 1,
   Educación: 2,
@@ -18,7 +18,7 @@ const mapUso = {
 const mapGarantia = {
   Hipoteca: 0,
   "Prendaria/Prenda": 1,
-  "Sin garantía": 3,
+  "Sin garantía": 6,
 } as const; // según tu especificación
 
 const COEF = {
@@ -41,7 +41,11 @@ function computePD(input: FormState) {
     COEF.monto * (input.monto || 0) +
     COEF.buro * mapBuro[input.buro] +
     COEF.endeudamiento * (input.endeudamiento || 0) +
-    (input.endeudamiento <= 70 ? 1/ (COEF.ingresos * ((input.monto / input.ingresos)) || 0) : 0) +
+    (input.endeudamiento <= 70
+      ? input.ingresos > 5000
+        ? 1 / (COEF.ingresos * ((input.monto / input.ingresos)))
+        : calculateIncomeCOEF(input.ingresos)
+      : 0) +
     (typeof COEF.edad === "function" ? COEF.edad(input.edad || 0) : COEF.edad * (input.edad || 0)) + //change into to function
     COEF.sexo * mapSexo[input.sexo] + 
     (typeof COEF.antiguedad === "function" ? COEF.antiguedad(input.antiguedad || 0) : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
@@ -83,7 +87,7 @@ export default function PDPage() {
     edad: 32,
     sexo: "Masculino",
     antiguedad: 4,  
-    empleo: "Formal",
+    empleo: "Formal dependiente",
     uso: "Consumo",
     garantia: "Prendaria/Prenda",
   });
@@ -284,7 +288,7 @@ export default function PDPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayIngresos}
-                onChange={(e) => handleNumericChange("ingresos", "Ingresos", e.target.value, 0, 100000000)}
+                onChange={(e) => handleNumericChange("ingresos", "Ingresos", e.target.value, 1, 100000000)}
                 placeholder="0.00"
               />
             </div>
@@ -384,7 +388,7 @@ export default function PDPage() {
                   edad: 32,
                   sexo: "Masculino",
                   antiguedad: 4,
-                  empleo: "Formal",
+                  empleo: "Formal dependiente",
                   uso: "Consumo",
                   garantia: "Prendaria/Prenda",
                 });

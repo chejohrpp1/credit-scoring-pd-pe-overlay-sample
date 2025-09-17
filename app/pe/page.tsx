@@ -111,19 +111,47 @@ export default function PEPage() {
     max: number,
     label: string
   ) => {
-    const { numericValue, displayValue } = validateNumericInput(rawValue);
-    // update display immediately
-    setDisplayForm((prev) => ({ ...prev, [field]: displayValue }));
-    if (rawValue === "" || rawValue === "0") {
-      setForm((prev) => ({ ...prev, [field]: Number(rawValue) }));
+    // Allow only numbers and decimal separators
+    const cleaned = rawValue.replace(/[^0-9.,]/g, "");
+    
+    // If value ends with a dot or comma, keep it for decimal input
+    if (cleaned.endsWith(".") || cleaned.endsWith(",")) {
+      setDisplayForm((prev) => ({ ...prev, [field]: cleaned }));
       return;
     }
-    if (Number.isNaN(numericValue)) return;
-    const clamped = Math.max(min, Math.min(max, numericValue));
-    if (clamped !== numericValue) {
+
+    const normalized = cleaned.replace(",", ".");
+    const parsed = parseFloat(normalized);
+    
+    // If empty or invalid, just update display
+    if (isNaN(parsed) || cleaned === "") {
+      setDisplayForm((prev) => ({ ...prev, [field]: cleaned }));
+      return;
+    }
+
+    // Handle zero as a special case
+    if (parsed === 0) {
+      setDisplayForm((prev) => ({ ...prev, [field]: "0" }));
+      setForm((prev) => ({ ...prev, [field]: 0 }));
+      return;
+    }
+
+    // Apply min/max constraints
+    const clamped = Math.max(min, Math.min(max, parsed));
+    
+    // Show toast if value was adjusted
+    if (clamped !== parsed) {
       toast.info(`${label} ajustado a ${clamped} (rango permitido ${min}-${max})`);
     }
-    setDisplayForm((prev) => ({ ...prev, [field]: clamped.toString() }));
+    
+    // Update both display and form values
+    const displayValue = normalized.includes(".") 
+      ? normalized.endsWith("0") 
+        ? normalized // Keep trailing zeros after decimal
+        : clamped.toString()
+      : clamped.toString();
+      
+    setDisplayForm((prev) => ({ ...prev, [field]: displayValue }));
     setForm((prev) => ({ ...prev, [field]: clamped }));
   };
 
@@ -238,7 +266,7 @@ export default function PEPage() {
                 inputMode="decimal"
                 value={displayForm.ead}
                 onChange={(e) => updateField("ead")(e.target.value)}
-                placeholder="0"
+                placeholder="00.0"
               />
               <div
                 className="text-xs mt-1"

@@ -23,6 +23,18 @@ export const COEF_SCHEMA = [
       ],
     },
   },
+  {
+    Categoria: "ingresos",
+    Variable: {
+      Rangos: [
+        {
+          Rango: "equation",
+          Ponderador:
+            "1*(1+1/(value_i/1000))",
+        },
+      ],
+    },
+  }
 ];
 
 // --- helpers (mirror behavior from overlay/factors.ts) ---
@@ -49,8 +61,25 @@ const evalQuadraticExpr = (expr: string, value: number): number => {
   const b = parseFloat(quad[2]);
   const cStr = quad[3];
   const c = cStr.includes("%") ? parsePctStr(cStr) : parseFloat(cStr);
-  console.log(a * value * value + b * value + c)
   return a * value * value + b * value + c;
+};
+
+const evalGenericExpr = (expr: string, value: number): number => {
+  if (!expr) return 0;
+  try {
+    // Replace value_i (case-insensitive) with a safe variable 'x'
+    const replaced = expr.replace(/value_i/gi, 'x');
+    // Validate characters: digits, operators, parentheses, spaces, and 'x'
+    const valid = /^[0-9+\-*/(). x]+$/.test(replaced.replace(/\s+/g, ''));
+    if (!valid) return 0;
+    // Construct a new function to evaluate the expression with x = value
+    // Wrapping in parentheses ensures correct return of expression value
+    const fn = new Function('x', `return (${replaced});`) as (x: number) => unknown;
+    const out = Number(fn(value)) ;
+    return Number.isFinite(out) ? out : 0;
+  } catch {
+    return 0;
+  }
 };
 
 type RangoDef = { Rango: string; Ponderador: string };
@@ -110,4 +139,13 @@ export const evaluateAntiguedadRangeCOEF = (yearsInCurrentJob: number): number =
   }
   //console.log(`${beta} * ${y} = ${beta * y}`)
   return beta * y;
+};
+
+export const calculateIncomeCOEF = (income: number): number => {
+  const incomeDef = getSchemaByCategoria("ingresos");
+  const rangos: Array<{ Rango: string; Ponderador: string }> =
+    incomeDef?.Variable?.Rangos ?? incomeDef?.variable?.Rangos ?? [];
+  const expr = rangos.find((r) => r.Rango.toLowerCase() === "equation")?.Ponderador ?? "";
+  if (expr) return evalGenericExpr(expr, income);
+  return 0;
 };
