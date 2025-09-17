@@ -3,32 +3,6 @@ import { useState, useEffect } from "react";
 import { Percent, ChevronDown } from "lucide-react";
 import { toast } from "react-toastify";
 
-// Validation function from PE page
-function validateNumericInput(value: string): {
-  numericValue: number;
-  displayValue: string;
-} {
-  // Permitir solo números, punto decimal y coma como separador decimal
-  // Permitir punto o coma al final para que el usuario pueda escribir decimales
-  const cleaned = value.replace(/[^0-9.,]/g, "");
-
-  // Si el valor termina en punto o coma, mantenerlo para permitir escritura de decimales
-  if (cleaned.endsWith(".") || cleaned.endsWith(",")) {
-    return { numericValue: 0, displayValue: cleaned };
-  }
-
-  const normalized = cleaned.replace(",", ".");
-  const parsed = parseFloat(normalized);
-
-  // Si es un número válido, devolverlo formateado
-  if (!isNaN(parsed) && parsed >= 0) {
-    return { numericValue: parsed, displayValue: parsed.toString() };
-  }
-
-  // Si está vacío o es inválido, permitir cadena vacía para edición
-  return { numericValue: 0, displayValue: cleaned };
-}
-
 export function FactorField({
   label,
   kind,

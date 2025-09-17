@@ -116,25 +116,6 @@ export default function PDPage() {
     (v: FormState[K]) =>
       setF((prev) => ({ ...prev, [k]: v }));
 
-  // Generic numeric clamp with toast notification
-  const setClamped = <K extends keyof FormState>(
-    key: K,
-    raw: number | string,
-    min: number,
-    max: number,
-    label?: string
-  ) => {
-    const n = typeof raw === "number" ? raw : Number(raw);
-    if (Number.isNaN(n)) return; // ignore invalid numbers
-    const clamped = Math.max(min, Math.min(max, n));
-    if (clamped !== n) {
-      toast.info(
-        `${label ?? String(key)} ajustado a ${clamped} (rango permitido ${min}-${max})`
-      );
-    }
-    set(key)(clamped as FormState[K]);
-  };
-
   // Text-input friendly numeric handler with clamping and display sync
   const handleNumericChange = (
     key: keyof FormState,

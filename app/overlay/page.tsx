@@ -225,7 +225,7 @@ export default function OverlayPage() {
           <div className="text-sm label mb-3 flex items-center gap-2">
             <Info className="w-4 h-4" /> Resumen de factores por grupo
           </div>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {FACTOR_SCHEMA.map((cat) => {
               const c = perCategory[cat.Categoria as CategoryKey];
               return (
@@ -240,7 +240,7 @@ export default function OverlayPage() {
                   <div className="text-sm font-semibold mb-1">
                     {cat.Categoria}
                   </div>  
-                  <div className="mt-2 text-sm">
+                  <div className="mt-4 text-md">
                     Factor total: <b>{c ? c.factor.toFixed(4) : "1.0000"}</b>
                   </div>
                 </div>
@@ -257,7 +257,7 @@ export default function OverlayPage() {
         <div className="grid grid-cols-1 md:grid-cols-[260px_auto] items-center gap-6">
           {/* PE base */}
           <div>
-            <div className="label mb-1">PE (Pérdida Esperada base)</div>
+            <div className="label mb-1">PE (Pérdida Esperada de la cartera)</div>
             <input
               className="input"
               type="text"
