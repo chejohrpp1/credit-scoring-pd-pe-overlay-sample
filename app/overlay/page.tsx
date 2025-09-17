@@ -9,6 +9,7 @@ import {
   matchRangeGetBeta,
   SelectLevel,
 } from "@/app/helpers/overlay/factors";
+import { toast } from "react-toastify";
 
 
 type InputValue = number | SelectLevel;
@@ -134,6 +135,25 @@ export default function OverlayPage() {
   const set = (key: string) => (val: number | string) =>
     setInputs((prev) => ({ ...prev, [key]: val as InputValue }));
 
+  // Generic numeric clamp with toast notification for overlay inputs
+  const setClamped = (
+    key: string,
+    raw: number | string,
+    min: number,
+    max: number,
+    label?: string
+  ) => {
+    const n = typeof raw === "number" ? raw : Number(raw);
+    if (Number.isNaN(n)) return; // ignore invalid numbers
+    const clamped = Math.max(min, Math.min(max, n));
+    if (clamped !== n) {
+      toast.info(
+        `${label ?? key} ajustado a ${clamped} (rango permitido ${min}-${max})`
+      );
+    }
+    set(key)(clamped);
+  };
+
   const handlePeBaseChange = (value: string) => {
     const validation = validateNumericInput(value);
     
@@ -142,7 +162,15 @@ export default function OverlayPage() {
     
     // Only update the actual value if it's valid
     if (validation.numericValue > 0 || value === "" || value === "0") {
-      setPeBase(validation.numericValue);
+      // Apply clamping for PE base (0 to 100000000)
+      const clamped = Math.max(0, Math.min(100000000, validation.numericValue));
+      if (clamped !== validation.numericValue) {
+        toast.info(
+          `PE base ajustada a ${clamped} (rango permitido 0-100000000)`
+        );
+        setPeBaseDisplay(clamped.toString());
+      }
+      setPeBase(clamped);
     }
   };
 
@@ -173,7 +201,16 @@ export default function OverlayPage() {
                         label={v.Variable}
                         kind={kind}
                         value={inputs[key]}
-                        onChange={set(key)}
+                        onChange={(val) => {
+                          // Apply clamping based on field kind
+                          if (kind === "percent" || kind === "equation") {
+                            setClamped(key, val, 0, 100, v.Variable);
+                          } else if (kind === "amount") {
+                            setClamped(key, val, 0, 100000000, v.Variable);
+                          } else {
+                            set(key)(val);
+                          }
+                        }}
                         helper={v.Rangos.map(
                           (r) => `${r.Rango} → β ${r.Ponderador}`
                         ).join(" • ")}

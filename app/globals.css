@@ -62,3 +62,20 @@ font-feature-settings: "ss01" on, "ss02" on;
 /* tabla simple */
 .table th { @apply text-left text-xs font-medium px-3 py-2; color: var(--fg-muted); background: #0f1420; }
 .table td { @apply px-3 py-2 border-b; border-color: var(--ring); }
+
+/* Ensure toast text doesn't inherit caps/alternate stylistic sets */
+.Toastify__toast, .Toastify__toast-body {
+  text-transform: none;
+  font-variant-caps: normal;
+  font-feature-settings: normal;
+  letter-spacing: normal;
+}
+
+/* Customize info toast background */
+.Toastify__toast--info {
+  background-color: #002960 !important;
+  color: #ffffff;
+}
+.Toastify__progress-bar--info {
+  background: rgba(255,255,255,0.7) !important;
+}

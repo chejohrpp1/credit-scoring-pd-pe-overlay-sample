@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import "./globals.css";
 import { Sidebar } from "./components/Sidebar";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -62,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Main */}
           <main className="p-4 md:p-6 space-y-6 z-10">{children}</main>
         </div>
+        <ToastContainer position="top-right" newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover theme="colored" />
       </body>
     </html>
   );

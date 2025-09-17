@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { Info, Calculator } from "lucide-react";
+import { toast } from "react-toastify";
 import { ELDonut } from "../components/ELDonut";
 
 // === Estado de formulario ===
@@ -102,6 +103,30 @@ export default function PEPage() {
     }
   };
 
+  // Clamp helper with toast (generic for this page)
+  const updateFieldClamped = (
+    field: keyof PEFormState,
+    rawValue: string,
+    min: number,
+    max: number,
+    label: string
+  ) => {
+    const { numericValue, displayValue } = validateNumericInput(rawValue);
+    // update display immediately
+    setDisplayForm((prev) => ({ ...prev, [field]: displayValue }));
+    if (rawValue === "" || rawValue === "0") {
+      setForm((prev) => ({ ...prev, [field]: Number(rawValue) }));
+      return;
+    }
+    if (Number.isNaN(numericValue)) return;
+    const clamped = Math.max(min, Math.min(max, numericValue));
+    if (clamped !== numericValue) {
+      toast.info(`${label} ajustado a ${clamped} (rango permitido ${min}-${max})`);
+    }
+    setDisplayForm((prev) => ({ ...prev, [field]: clamped.toString() }));
+    setForm((prev) => ({ ...prev, [field]: clamped }));
+  };
+
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
@@ -184,8 +209,9 @@ export default function PEPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayForm.pd}
-                onChange={(e) => updateField("pd")(e.target.value)}
+                onChange={(e) => updateFieldClamped("pd", e.target.value, 0, 100, "PD")}
                 placeholder="0.00"
+                //setclamped from 0 to 100
               />
             </div>
 
@@ -198,8 +224,9 @@ export default function PEPage() {
                 type="text"
                 inputMode="decimal"
                 value={displayForm.lgd}
-                onChange={(e) => updateField("lgd")(e.target.value)}
+                onChange={(e) => updateFieldClamped("lgd", e.target.value, 0, 100, "LGD")}
                 placeholder="0.00"
+                //setclamped from 0 to 100
               />
             </div>
 

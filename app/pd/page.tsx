@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { Info, Sparkles } from "lucide-react";
 import { Gauge } from "../components/Gauge";
 import Image from "next/image";
+import { calculateEdadCOEF, evaluateAntiguedadRangeCOEF } from "../helpers/pd/utils";
+import { toast } from "react-toastify";
 
 const mapBuro = { A: 0, B: 1, C: 2, D: 3, E: 4 } as const;
 const mapSexo = { Masculino: 0, Femenino: 1 } as const;
@@ -22,15 +24,15 @@ const mapGarantia = {
 const COEF = {
   intercepto: -1.97,
   monto: 0.36 / 100000, // a mayor monto (Q), menor PD (de ejemplo)
-  buro: 0.01, // peores letras aumentan PD
+  buro: 0.1, // peores letras aumentan PD
   endeudamiento: 5.46 / 100, // % 0..100
   ingresos: -0.12 / 1000, // más ingresos, menor PD
-  edad: -0.03, // mayor edad, leve menor PD
-  sexo: -0.01, // Masculino=1, Femenino=0 (ejemplo, ajusta o elimina si no procede)
-  antiguedad: -0.25, // años en empleo actual
-  empleo: 0.14, // Formal>Indep>Informal (mayor valor -> menor riesgo)
-  uso: 0.01, // Productivos(1) mejor que Consumo(3), etc.
-  garantia: 0.01, // hipoteca mejor que sin garantía (3)
+  edad: calculateEdadCOEF, // will be the funcion calculateEdadCOEF
+  sexo: -0.1, // Masculino=1, Femenino=0 (ejemplo, ajusta o elimina si no procede)
+  antiguedad: evaluateAntiguedadRangeCOEF, // años en empleo actual -> restriction: hasta 30 años -> hacer un rango -> use the function evaluateAntiguedadRangeCOEF
+  empleo: 0.474, // Formal>Indep>Informal (mayor valor -> menor riesgo)
+  uso: 0.1, // Productivos(1) mejor que Consumo(3), etc.
+  garantia: 0.1, // hipoteca mejor que sin garantía (3)
 };
 
 function computePD(input: FormState) {
@@ -40,9 +42,9 @@ function computePD(input: FormState) {
     COEF.buro * mapBuro[input.buro] +
     COEF.endeudamiento * (input.endeudamiento || 0) +
     COEF.ingresos * (input.ingresos || 0) +
-    COEF.edad * (input.edad || 0) +
-    COEF.sexo * mapSexo[input.sexo] +
-    COEF.antiguedad * (input.antiguedad || 0) +
+    (typeof COEF.edad === "function" ? COEF.edad(input.edad || 0) : COEF.edad * (input.edad || 0)) + //change into to function
+    COEF.sexo * mapSexo[input.sexo] + 
+    (typeof COEF.antiguedad === "function" ? COEF.antiguedad(input.antiguedad || 0) : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
     COEF.empleo * mapEmpleo[input.empleo] +
     COEF.uso * mapUso[input.uso] +
     COEF.garantia * mapGarantia[input.garantia];
@@ -102,6 +104,25 @@ export default function PDPage() {
     <K extends keyof FormState>(k: K) =>
     (v: FormState[K]) =>
       setF((prev) => ({ ...prev, [k]: v }));
+
+  // Generic numeric clamp with toast notification
+  const setClamped = <K extends keyof FormState>(
+    key: K,
+    raw: number | string,
+    min: number,
+    max: number,
+    label?: string
+  ) => {
+    const n = typeof raw === "number" ? raw : Number(raw);
+    if (Number.isNaN(n)) return; // ignore invalid numbers
+    const clamped = Math.max(min, Math.min(max, n));
+    if (clamped !== n) {
+      toast.info(
+        `${label ?? String(key)} ajustado a ${clamped} (rango permitido ${min}-${max})`
+      );
+    }
+    set(key)(clamped as FormState[K]);
+  };
 
   return (
     <div className="space-y-6">
@@ -182,7 +203,7 @@ export default function PDPage() {
                 min={0}
                 step={100}
                 value={f.monto}
-                onChange={(e) => set("monto")(Number(e.target.value))}
+                onChange={(e) => setClamped("monto", e.target.value, 0, 100000000, "Monto")}
               />
             </div>
 
@@ -210,7 +231,7 @@ export default function PDPage() {
                 max={100}
                 step={1}
                 value={f.endeudamiento}
-                onChange={(e) => set("endeudamiento")(Number(e.target.value))}
+                onChange={(e) => setClamped("endeudamiento", e.target.value, 0, 100, "Endeudamiento (%)")}
               />
               <div
                 className="text-xs mt-1"
@@ -228,7 +249,7 @@ export default function PDPage() {
                 min={0}
                 step={100}
                 value={f.ingresos}
-                onChange={(e) => set("ingresos")(Number(e.target.value))}
+                onChange={(e) => setClamped("ingresos", e.target.value, 0, 100000000, "Ingresos")}
               />
             </div>
 
@@ -240,7 +261,7 @@ export default function PDPage() {
                 min={18}
                 max={101}
                 value={f.edad}
-                onChange={(e) => set("edad")(Number(e.target.value))}
+                onChange={(e) => setClamped("edad", e.target.value, 0, 101, "Edad")}
               />
             </div>
 
@@ -265,9 +286,9 @@ export default function PDPage() {
                 className="input"
                 type="number"
                 min={0}
-                max={60}
+                max={30}
                 value={f.antiguedad}
-                onChange={(e) => set("antiguedad")(Number(e.target.value))}
+                onChange={(e) => setClamped("antiguedad", e.target.value, 0, 30, "Antigüedad")}
               />
             </div>
 

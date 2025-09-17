@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Percent, ChevronDown } from "lucide-react";
+import { toast } from "react-toastify";
 
 // Validation function from PE page
 function validateNumericInput(value: string): {
@@ -48,15 +49,31 @@ export function FactorField({
   });
 
   const handleNumericChange = (inputValue: string) => {
-    const validation = validateNumericInput(inputValue);
-    
-    // Update display value
-    setDisplayValue(validation.displayValue);
-    
-    // Only update the actual value if it's valid
-    if (validation.numericValue > 0 || inputValue === "" || inputValue === "0") {
-      onChange(validation.numericValue);
+    // permitir solo números y separadores decimales
+    const cleaned = inputValue.replace(/[^0-9.,]/g, "");
+    const normalized = cleaned.replace(",", ".");
+
+    // si termina en punto/coma, no forzar aún (pero no propagar)
+    if (cleaned.endsWith(".") || cleaned.endsWith(",")) {
+      setDisplayValue(cleaned);
+      return;
     }
+
+    const parsed = parseFloat(normalized);
+    if (Number.isNaN(parsed)) {
+      setDisplayValue(cleaned);
+      return;
+    }
+
+    const min = 0;
+    const max = (kind === "percent" || kind === "equation") ? 100 : 100000000;
+    const clamped = Math.max(min, Math.min(max, parsed));
+    if (clamped !== parsed) {
+      toast.info(`${label} ajustado a ${clamped} (rango permitido ${min}-${max})`);
+    }
+
+    setDisplayValue(clamped.toString());
+    onChange(clamped);
   };
 
   // Update display value when prop value changes
@@ -92,9 +109,9 @@ export function FactorField({
             inputMode="decimal"
             value={displayValue}
             onChange={(e) => handleNumericChange(e.target.value)}
-            placeholder={kind === "percent" || "equation" ? "0.00" : "0"}
+            placeholder={(kind === "percent" || kind === "equation") ? "0.00" : "0"}
           />
-          {kind === "percent" || "equation" ? (
+          {(kind === "percent" || kind === "equation") ? (
             <Percent className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 opacity-70" />
           ) : (
             <span className="text-xs font-medium absolute right-2 top-1/2 -translate-y-1/2 opacity-70">Q.</span>
