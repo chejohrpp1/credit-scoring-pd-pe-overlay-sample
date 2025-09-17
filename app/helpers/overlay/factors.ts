@@ -5,6 +5,7 @@ export type VariableDef = Readonly<{
   Variable: string;
   Rangos: ReadonlyArray<VariableRange>;
   Default?: string | number;
+  spanLabel?: string;
 }>;
 export type CategoryDef = Readonly<{
   Categoria: CategoryKey;
@@ -26,11 +27,13 @@ export const FACTOR_SCHEMA = [
         Variable: "Tasa de remesas nacional (0-100)", //-0.1125 * X  + 0.0306
         Default: 20,
         Rangos: [{ Rango: "equation", Ponderador: "-0.1125*value_i+0.0306" }],
+        spanLabel: undefined,
       },
       {
         Variable: "Crecimiento del PIB Real (0-100)", //- 0.6244 * X  +  0.05
         Default: 3.5,
         Rangos: [{ Rango: "equation", Ponderador: "-0.6244*value_i+0.05" }],
+        spanLabel: undefined,
       },
     ],
   },
@@ -46,6 +49,7 @@ export const FACTOR_SCHEMA = [
             Ponderador: "26.086*(value_i^2) - 1.6287*value_i + 0.0308",
           },
         ],
+        spanLabel: undefined,
       },
     ],
   },
@@ -56,11 +60,13 @@ export const FACTOR_SCHEMA = [
         Variable: "Calificación de gobierno cooperativo (0-100)", //agregar restriccion de 0-100
         Default: 60,
         Rangos: [{ Rango: "equation", Ponderador: "-0.012*value_i+0.023" }],
+        spanLabel: "Pts.",
       },
       {
-        Variable: "Índice de compliance (0-100)", //agregar restriccion de 0-100
+        Variable: "Riesgo legal (0-100)", //agregar restriccion de 0-100
         Default: 80,
         Rangos: [{ Rango: "equation", Ponderador: "-0.012*value_i+0.023" }],
+        spanLabel: "Pts.",
       },
     ],
   },
@@ -74,6 +80,7 @@ export const FACTOR_SCHEMA = [
           { Rango: "< 1%", Ponderador: "0.7436%" },
           { Rango: "> 1%", Ponderador: "0.7436%" },
         ],
+        spanLabel: undefined,
       },
     ],
   },

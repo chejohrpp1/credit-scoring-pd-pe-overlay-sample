@@ -211,9 +211,7 @@ export default function OverlayPage() {
                             set(key)(val);
                           }
                         }}
-                        helper={v.Rangos.map(
-                          (r) => `${r.Rango} → β ${r.Ponderador}`
-                        ).join(" • ")}
+                        spanLabel={v.spanLabel}
                       />
                     );
                   })}
