@@ -26,7 +26,7 @@ const COEF = {
   monto: 0.36 / 100000, // a mayor monto (Q), menor PD (de ejemplo)
   buro: 0.1, // peores letras aumentan PD
   endeudamiento: 5.46 / 100, // % 0..100
-  ingresos: -0.12 / 1000, // más ingresos, menor PD
+  ingresos: -0.038, // más ingresos, menor PD
   edad: calculateEdadCOEF, // will be the funcion calculateEdadCOEF
   sexo: -0.1, // Masculino=1, Femenino=0 (ejemplo, ajusta o elimina si no procede)
   antiguedad: evaluateAntiguedadRangeCOEF, // años en empleo actual -> restriction: hasta 30 años -> hacer un rango -> use the function evaluateAntiguedadRangeCOEF
@@ -41,7 +41,7 @@ function computePD(input: FormState) {
     COEF.monto * (input.monto || 0) +
     COEF.buro * mapBuro[input.buro] +
     COEF.endeudamiento * (input.endeudamiento || 0) +
-    (input.endeudamiento <= 70 ? COEF.ingresos * (input.ingresos || 0) : 0) +
+    (input.endeudamiento <= 70 ? 1/ (COEF.ingresos * ((input.monto / input.ingresos)) || 0) : 0) +
     (typeof COEF.edad === "function" ? COEF.edad(input.edad || 0) : COEF.edad * (input.edad || 0)) + //change into to function
     COEF.sexo * mapSexo[input.sexo] + 
     (typeof COEF.antiguedad === "function" ? COEF.antiguedad(input.antiguedad || 0) : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
@@ -80,11 +80,11 @@ export default function PDPage() {
     buro: "B",
     endeudamiento: 15,
     ingresos: 6000,
-    edad: 23,
+    edad: 32,
     sexo: "Masculino",
     antiguedad: 4,  
     empleo: "Formal",
-    uso: "Productivos",
+    uso: "Consumo",
     garantia: "Prendaria/Prenda",
   });
 
@@ -92,7 +92,7 @@ export default function PDPage() {
   const [displayMonto, setDisplayMonto] = useState<string>("250000");
   const [displayIngresos, setDisplayIngresos] = useState<string>("6000");
   const [displayEndeudamiento, setDisplayEndeudamiento] = useState<string>("15");
-  const [displayEdad, setDisplayEdad] = useState<string>("23");
+  const [displayEdad, setDisplayEdad] = useState<string>("32");
   const [displayAntiguedad, setDisplayAntiguedad] = useState<string>("4");
 
   const pd = useMemo(() => computePD(f), [f]);
@@ -381,13 +381,18 @@ export default function PDPage() {
                   buro: "B",
                   endeudamiento: 15,
                   ingresos: 6000,
-                  edad: 23,
+                  edad: 32,
                   sexo: "Masculino",
                   antiguedad: 4,
                   empleo: "Formal",
-                  uso: "Productivos",
+                  uso: "Consumo",
                   garantia: "Prendaria/Prenda",
                 });
+                setDisplayMonto("250000");
+                setDisplayIngresos("6000");
+                setDisplayEndeudamiento("15");
+                setDisplayEdad("32");
+                setDisplayAntiguedad("4");
               }}
             >
               Reiniciar
