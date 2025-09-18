@@ -9,6 +9,7 @@ export type VariableDef = Readonly<{
 }>;
 export type CategoryDef = Readonly<{
   Categoria: CategoryKey;
+  description: string;
   Variables: ReadonlyArray<VariableDef>;
 }>;
 
@@ -21,6 +22,7 @@ export type CategoryKey =
 export const FACTOR_SCHEMA = [
   {
     Categoria: "Entorno Económico Nacional",
+    description: "Indicadores económicos nacionales",
     Variables: [
       
       {
@@ -39,6 +41,7 @@ export const FACTOR_SCHEMA = [
   },
   {
     Categoria: "Entorno Regional",
+    description: "Indicadores económicos regionales",
     Variables: [
       {
         Variable: "Inflación regional (%)", //26.086 * (X^2)   - 1.6287 * X    + 0.0308
@@ -55,6 +58,7 @@ export const FACTOR_SCHEMA = [
   },
   {
     Categoria: "Gobierno Cooperativo",
+    description: "Indicadores del gobierno cooperativo",
     Variables: [
       {
         Variable: "Calificación de gobernabilidad (0-100)", //agregar restriccion de 0-100
@@ -72,6 +76,7 @@ export const FACTOR_SCHEMA = [
   },
   {
     Categoria: "Entorno Financiero",
+    description: "Indicadores del entorno financiero",
     Variables: [
       {
         Variable: "Tasa de Morosidad del Sistema (%)", //value_i/100 * 0.7436

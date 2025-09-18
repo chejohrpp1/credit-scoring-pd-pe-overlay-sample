@@ -232,7 +232,15 @@ export default function PEPage() {
 
           <div className="flex-1 space-y-4">
             <div>
-              <div className="label mb-1">Probabilidad de Default - PD (%)</div>
+              <div className="label mb-1">
+                Probabilidad de Default - PD (%)
+                <span
+                  className="ml-2 text-xs px-2 py-0.5 rounded border"
+                  style={{ background: "var(--muted)", borderColor: "var(--ring)", color: "var(--fg-muted)" }}
+                >
+                  Solo lectura
+                </span>
+              </div>
               <input
                 className="input"
                 type="text"
@@ -240,12 +248,22 @@ export default function PEPage() {
                 value={displayForm.pd}
                 onChange={(e) => updateFieldClamped("pd", e.target.value, 0, 100, "PD")}
                 placeholder="0.00"
+                readOnly
+                aria-readonly
+                title="Solo lectura"
+                style={{ background: "var(--muted)", color: "var(--fg-muted)", cursor: "not-allowed" }}
               />
             </div>
 
             <div>
               <div className="label mb-1">
                 Pérdida dada al Default - LGD (%)
+                <span
+                  className="ml-2 text-xs px-2 py-0.5 rounded border"
+                  style={{ background: "var(--muted)", borderColor: "var(--ring)", color: "var(--fg-muted)" }}
+                >
+                  Solo lectura
+                </span>
               </div>
               <input
                 className="input"
@@ -254,6 +272,10 @@ export default function PEPage() {
                 value={displayForm.lgd}
                 onChange={(e) => updateFieldClamped("lgd", e.target.value, 0, 100, "LGD")}
                 placeholder="0.00"
+                readOnly
+                aria-readonly
+                title="Solo lectura"
+                style={{ background: "var(--muted)", color: "var(--fg-muted)", cursor: "not-allowed" }}
               />
             </div>
 
@@ -276,26 +298,6 @@ export default function PEPage() {
                 Monto total expuesto: {fmtQ(form.ead)}
               </div>
             </div>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setForm({
-                  pd: 6.7,
-                  lgd: 45,
-                  ead: 250000,
-                });
-                setDisplayForm({
-                  pd: "6.7",
-                  lgd: "45",
-                  ead: "250000",
-                });
-              }}
-            >
-              Valores por Defecto
-            </button>
           </div>
         </section>
       </div>

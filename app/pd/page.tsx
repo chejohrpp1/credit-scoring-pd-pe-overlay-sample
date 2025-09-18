@@ -171,7 +171,7 @@ export default function PDPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">
-          Predictor de Riesgo individual (Probabilidad de Default)
+          Scoring crediticio
         </h1>
         <button className="btn">
           <Sparkles className="w-4 h-4" /> Predecir
@@ -235,7 +235,7 @@ export default function PDPage() {
         {/* Formulario */}
         <section className="card space-y-4">
           <h2 className="text-sm font-semibold">
-            Ingrese la información del cliente
+            Ingrese la información del asociado
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

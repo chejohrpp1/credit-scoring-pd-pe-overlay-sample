@@ -65,7 +65,7 @@ export function Sidebar({
             </div>
 
         <nav className="flex flex-col gap-2">
-          <NavLink href="/pd" label="Predictor de Riesgo (PD)" icon={<Gauge className="w-4 h-4" />} />
+          <NavLink href="/pd" label="Scoring crediticio" icon={<Gauge className="w-4 h-4" />} />
           <NavLink href="/pe" label="Pérdidas Esperadas (PE)" icon={<Calculator className="w-4 h-4" />} />
           <NavLink href="/overlay" label="Overlay / Ajustes" icon={<SlidersHorizontal className="w-4 h-4" />} />
         </nav>
@@ -100,7 +100,7 @@ export function Sidebar({
         </div>
 
         <nav className="flex flex-col gap-2 p-3">
-          <NavLink href="/pd" label="Predictor de Riesgo (PD)" icon={<Gauge className="w-4 h-4" />} onClick={onClose} />
+          <NavLink href="/pd" label="Scoring crediticio" icon={<Gauge className="w-4 h-4" />} onClick={onClose} />
           <NavLink href="/pe" label="Pérdidas Esperadas (PE)" icon={<Calculator className="w-4 h-4" />} onClick={onClose} />
           <NavLink href="/overlay" label="Overlay / Ajustes" icon={<SlidersHorizontal className="w-4 h-4" />} onClick={onClose} />
         </nav>

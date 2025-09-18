@@ -181,78 +181,7 @@ export default function OverlayPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Overlay / Factores de Ajuste</h1>
 
-      {/* GRID SUPERIOR: Inputs (izq) + Resumen por grupo (der) – misma altura, scroll interno */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* SECTION 1: Inputs */}
-        <section className="card h-[480px] overflow-y-auto">
-          <div className="text-sm label mb-3 flex items-center gap-2">
-            <Info className="w-4 h-4" /> Entorno Económico Nacional / Regional /
-            Gobierno Cooperativo / Entorno Financiero
-          </div>
-          {/* Mapeo de inputs por categoría */}
-          <div className="space-y-6">
-            {FACTOR_SCHEMA.map((cat) => (
-              <div key={cat.Categoria}>
-                <h3 className="text-sm font-semibold mb-2">{cat.Categoria}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {cat.Variables.map((v) => {
-                    const key = `${cat.Categoria}::${v.Variable}`;
-                    const kind = inferFieldKind(v);
-                    return (
-                      <FactorField
-                        key={key}
-                        label={v.Variable}
-                        kind={kind}
-                        value={inputs[key]}
-                        onChange={(val) => {
-                          // Apply clamping based on field kind
-                          if (kind === "percent" || kind === "equation") {
-                            setClamped(key, val, 0, 100, v.Variable);
-                          } else if (kind === "amount") {
-                            setClamped(key, val, 0, 100000000, v.Variable);
-                          } else {
-                            set(key)(val);
-                          }
-                        }}
-                        spanLabel={v.spanLabel}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        {/* SECTION 2: Resumen por grupo (igual altura, scroll) */}
-        <section className="card h-[480px] overflow-y-auto">
-          <div className="text-sm label mb-3 flex items-center gap-2">
-            <Info className="w-4 h-4" /> Resumen de factores por grupo
-          </div>
-          <div className="space-y-6">
-            {FACTOR_SCHEMA.map((cat) => {
-              const c = perCategory[cat.Categoria as CategoryKey];
-              return (
-                <div
-                  key={cat.Categoria}
-                  className="rounded-xl p-3 border"
-                  style={{
-                    borderColor: "var(--ring)",
-                    background: "var(--muted)",
-                  }}
-                >
-                  <div className="text-sm font-semibold mb-1">
-                    {cat.Categoria}
-                  </div>
-                  <div className="mt-4 text-md">
-                    Factor total: <b>{c ? c.factor.toFixed(4) : "1.0000"}</b>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      </div>
-      {/* SECTION 3: PE × Factores = Resultado */}
+      {/* SECTION 0: PE × Factores = Resultado */}
       <section className="card">
         <div className="text-sm label mb-3 flex items-center gap-2">
           <Info className="w-4 h-4" /> Cálculo de PE ajustada
@@ -310,45 +239,66 @@ export default function OverlayPage() {
           </div>
         </div>
       </section>
-      {/* SECTION 4: Resumen detallado */}
-      <section className="card">
-        <h3 className="text-sm font-semibold mb-2">Resumen</h3>
-        <div className="overflow-auto">
-          <table className="table w-full border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr>
-                <th>
-                  <p className="text-white">Categoría</p>
-                </th>
-                <th>
-                  <p className="text-white">Variable</p>
-                </th>
-                <th>
-                  <p className="text-white">Valor</p>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {FACTOR_SCHEMA.flatMap((cat) =>
-                cat.Variables.map((v) => {
-                  const key = `${cat.Categoria}::${v.Variable}`;
-                  return (
-                    <tr key={key}>
-                      <td>{cat.Categoria}</td>
-                      <td>{v.Variable}</td>
-                      <td>
-                        {typeof inputs[key] === "number"
-                          ? inputs[key]
-                          : String(inputs[key])}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+
+      {/* GRID SUPERIOR: Inputs (izq) + Resumen por grupo (der) – misma altura, scroll interno */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* SECTION 1: Inputs */}
+        <section className="card h-[480px] overflow-y-auto">
+          <div className="text-sm label mb-3 flex items-center gap-2">
+            <Info className="w-4 h-4" /> Factores por grupo
+          </div>
+          <div className="space-y-6">
+            {FACTOR_SCHEMA.map((cat) => {
+              const c = perCategory[cat.Categoria as CategoryKey];
+              return (
+                <div
+                  key={cat.Categoria}
+                  className="rounded-xl p-3 border"
+                  style={{
+                    borderColor: "var(--ring)",
+                    background: "var(--muted)",
+                  }}
+                >
+                  <div className="text-sm font-semibold mb-1">
+                    {cat.Categoria}
+                  </div>
+                  <div className="mt-4 text-md">
+                    Factor total: <b>{c ? c.factor.toFixed(4) : "1.0000"}</b>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+        {/* SECTION 2: Resumen por grupo (igual altura, scroll) */}
+        <section className="card h-[480px] overflow-y-auto">
+          <div className="text-sm label mb-3 flex items-center gap-2">
+            <Info className="w-4 h-4" /> Descripción de factores
+          </div>
+          <div className="space-y-6">
+            {FACTOR_SCHEMA.map((cat) => {
+              const c = perCategory[cat.Categoria as CategoryKey];
+              return (
+                <div
+                  key={cat.Categoria}
+                  className="rounded-xl p-3 border"
+                  style={{
+                    borderColor: "var(--ring)",
+                    background: "var(--muted)",
+                  }}
+                >
+                  <div className="text-sm font-semibold mb-1">
+                    {cat.Categoria}
+                  </div>
+                  <div className="mt-4 text-md">
+                    {cat.description}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
