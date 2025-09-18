@@ -96,9 +96,6 @@ export default function PDPage() {
         <h1 className="text-2xl font-semibold">
           Scoring crediticio
         </h1>
-        <button className="btn">
-          <Sparkles className="w-4 h-4" /> Predecir
-        </button>
       </header>
 
       {/* Resultado */}

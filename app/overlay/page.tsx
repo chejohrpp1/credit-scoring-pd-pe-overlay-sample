@@ -10,6 +10,7 @@ import {
   SelectLevel,
 } from "@/app/helpers/overlay/factors";
 import { toast } from "react-toastify";
+import { usePd } from "../context/PdProvider";
 
 type InputValue = number | SelectLevel;
 // removed unused InputMap type
@@ -57,6 +58,7 @@ function defaultValueFor(kind: ReturnType<typeof inferFieldKind>) {
 }
 
 export default function OverlayPage() {
+  const { peResult } = usePd();
   // Construye estado por categoría/variable
   const [inputs, setInputs] = useState<Record<string, string | number>>(() => {
     const obj: Record<string, string | number> = {};
@@ -74,9 +76,10 @@ export default function OverlayPage() {
     return obj;
   });
 
-  // PE base (traída de /pe o ingresada aquí manualmente)
-  const [peBase, setPeBase] = useState<number>(7537.5);
-  const [peBaseDisplay, setPeBaseDisplay] = useState<string>("7537.50");
+  // PE base (traída de /pe)
+  const initialPe = Number.isFinite(peResult) ? peResult : 100;
+  const [peBase, setPeBase] = useState<number>(initialPe);
+  const [peBaseDisplay, setPeBaseDisplay] = useState<string>(initialPe.toFixed(2));
 
   type Detail = { name: string; beta: number; value: InputValue };
   type PerCat = { factor: number; details: Detail[] };

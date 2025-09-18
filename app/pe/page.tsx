@@ -55,7 +55,7 @@ function validateNumericInput(value: string): {
 }
 
 export default function PEPage() {
-  const { pd: contextPd } = usePd();
+  const { pd: contextPd, setPeResult } = usePd();
   const [form, setForm] = useState<PEFormState>({
     pd: 6.7,
     lgd: 45,
@@ -75,6 +75,11 @@ export default function PEPage() {
     setForm((prev) => ({ ...prev, pd: contextPd }));
     setDisplayForm((prev) => ({ ...prev, pd: contextPd.toFixed(2) }));
   }, [contextPd]);
+
+  // Save computed EL into provider as PE result
+  useEffect(() => {
+    setPeResult(el);
+  }, [el, setPeResult]);
 
   // Determinar nivel de riesgo basado en EL
   const riskLevel = useMemo(() => {
@@ -168,9 +173,6 @@ export default function PEPage() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Pérdidas Esperadas (PE)</h1>
-        <button className="btn">
-          <Calculator className="w-4 h-4" /> Calcular
-        </button>
       </header>
 
       {/* Fórmula */}

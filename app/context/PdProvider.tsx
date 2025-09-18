@@ -24,6 +24,8 @@ type PdContextValue = {
   setField: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   pd: number;
   reset: () => void;
+  peResult: number;
+  setPeResult: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const PdContext = createContext<PdContextValue | undefined>(undefined);
@@ -35,18 +37,38 @@ export function PdProvider({ children }: { children: React.ReactNode }) {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        return { ...DEFAULT_FORM, ...parsed } as FormState;
+        // Backward compat: if parsed has 'form' assume new shape; else legacy form-only
+        if (parsed && typeof parsed === "object" && "form" in parsed) {
+          return { ...DEFAULT_FORM, ...(parsed.form as FormState) } as FormState;
+        }
+        return { ...DEFAULT_FORM, ...(parsed as Partial<FormState>) } as FormState;
       }
     } catch {}
     return DEFAULT_FORM;
   });
 
+  const [peResult, setPeResult] = useState<number>(() => {
+    if (typeof window === "undefined") return 100;
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && "peResult" in parsed) {
+          const v = Number(parsed.peResult);
+          return Number.isFinite(v) ? v : 100;
+        }
+      }
+    } catch {}
+    return 100;
+  });
+
   // Persist to localStorage when form changes
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      const payload = JSON.stringify({ form, peResult });
+      window.localStorage.setItem(STORAGE_KEY, payload);
     } catch {}
-  }, [form]);
+  }, [form, peResult]);
 
   const pd = useMemo(() => computePD(form), [form]);
 
@@ -55,7 +77,7 @@ export function PdProvider({ children }: { children: React.ReactNode }) {
 
   const reset = () => setForm(DEFAULT_FORM);
 
-  const value: PdContextValue = { form, setForm, setField, pd, reset };
+  const value: PdContextValue = { form, setForm, setField, pd, reset, peResult, setPeResult };
 
   return <PdContext.Provider value={value}>{children}</PdContext.Provider>;
 }
