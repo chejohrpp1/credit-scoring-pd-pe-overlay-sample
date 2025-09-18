@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Info, Calculator } from "lucide-react";
+import { Info } from "lucide-react";
 import { toast } from "react-toastify";
 import { ELDonut } from "../components/ELDonut";
 import { fmtQ } from "../helpers/components/utils";
 import { usePd } from "../context/PdProvider";
+import { evalLGD } from "../helpers/pe/model";
 
 // === Estado de formulario ===
 export type PEFormState = {
@@ -58,13 +59,13 @@ export default function PEPage() {
   const { pd: contextPd, setPeResult, form: pdForm } = usePd();
   const [form, setForm] = useState<PEFormState>({
     pd: contextPd,
-    lgd: 45,
+    lgd: evalLGD(pdForm.garantia),
     ead: pdForm.monto,
   });
 
   const [displayForm, setDisplayForm] = useState<PEFormDisplay>({
     pd: contextPd.toFixed(2),
-    lgd: "45",
+    lgd: evalLGD(pdForm.garantia).toFixed(2),
     ead: pdForm.monto.toFixed(2),
   });
 
@@ -72,9 +73,9 @@ export default function PEPage() {
 
   // Keep PD in sync with global PD context
   useEffect(() => {
-    setForm((prev) => ({ ...prev, pd: contextPd, ead: pdForm.monto }));
-    setDisplayForm((prev) => ({ ...prev, pd: contextPd.toFixed(2), ead: pdForm.monto.toFixed(2) }));
-  }, [contextPd, pdForm.monto]);
+    setForm((prev) => ({ ...prev, pd: contextPd, ead: pdForm.monto, lgd: evalLGD(pdForm.garantia) }));
+    setDisplayForm((prev) => ({ ...prev, pd: contextPd.toFixed(2), ead: pdForm.monto.toFixed(2), lgd: evalLGD(pdForm.garantia).toFixed(2) }));
+  }, [contextPd, pdForm.monto, pdForm.garantia]);
 
   // Save computed EL into provider as PE result
   useEffect(() => {

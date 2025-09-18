@@ -20,7 +20,7 @@ export const mapUso = {
   Consolidación: 4,
 } as const; // ya viene codificado
 export const mapGarantia = {
-  Hipoteca: 0,
+  "Hipoteca": 0,
   "Prendaria/Prenda": 1,
   "Sin garantía": 6,
 } as const; // según tu especificación
