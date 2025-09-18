@@ -9,6 +9,7 @@ import "./globals.css";
 import { Sidebar } from "./components/Sidebar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { PdProvider } from "./context/PdProvider";
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body>
+        <PdProvider>
         {/* Topbar (móvil) */}
         <header
           className="md:hidden sticky top-0 z-30 p-3 border-b backdrop-blur"
@@ -65,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="p-4 md:p-6 space-y-6 z-10">{children}</main>
         </div>
         <ToastContainer position="top-right" newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover theme="colored" />
+        </PdProvider>
       </body>
     </html>
   );

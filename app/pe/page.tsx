@@ -1,9 +1,10 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Info, Calculator } from "lucide-react";
 import { toast } from "react-toastify";
 import { ELDonut } from "../components/ELDonut";
 import { fmtQ } from "../helpers/components/utils";
+import { usePd } from "../context/PdProvider";
 
 // === Estado de formulario ===
 export type PEFormState = {
@@ -54,6 +55,7 @@ function validateNumericInput(value: string): {
 }
 
 export default function PEPage() {
+  const { pd: contextPd } = usePd();
   const [form, setForm] = useState<PEFormState>({
     pd: 6.7,
     lgd: 45,
@@ -67,6 +69,12 @@ export default function PEPage() {
   });
 
   const el = useMemo(() => computeEL(form), [form]);
+
+  // Keep PD in sync with global PD context
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, pd: contextPd }));
+    setDisplayForm((prev) => ({ ...prev, pd: contextPd.toFixed(2) }));
+  }, [contextPd]);
 
   // Determinar nivel de riesgo basado en EL
   const riskLevel = useMemo(() => {

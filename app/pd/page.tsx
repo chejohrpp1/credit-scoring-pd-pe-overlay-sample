@@ -1,118 +1,40 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Info, Sparkles } from "lucide-react";
 import { Gauge } from "../components/Gauge";
 import Image from "next/image";
-import {
-  calculateEdadCOEF,
-  calculateIncomeCOEF,
-  evaluateAntiguedadRangeCOEF,
-} from "../helpers/pd/utils";
 import { toast } from "react-toastify";
 import { fmtQ } from "../helpers/components/utils";
-
-const mapBuro = { A: 0, B: 1, C: 2, D: 3, E: 4 } as const;
-const mapSexo = { Masculino: 0, Femenino: 1 } as const;
-const mapEmpleo = {
-  "Formal dependiente": 0,
-  "Formal Independiente": 1,
-  Informal: 2,
-} as const;
-const mapUso = {
-  Productivos: 1,
-  Educación: 2,
-  Consumo: 3,
-  Consolidación: 4,
-} as const; // ya viene codificado
-const mapGarantia = {
-  Hipoteca: 0,
-  "Prendaria/Prenda": 1,
-  "Sin garantía": 6,
-} as const; // según tu especificación
-
-const COEF = {
-  intercepto: -3.97,
-  monto: 0.36 / 100000, // a mayor monto (Q), menor PD (de ejemplo)
-  buro: 0.1, // peores letras aumentan PD
-  endeudamiento: 5.46 / 100, // % 0..100
-  ingresos: -0.038, // más ingresos, menor PD
-  edad: calculateEdadCOEF, // will be the funcion calculateEdadCOEF
-  sexo: -0.1, // Masculino=1, Femenino=0 (ejemplo, ajusta o elimina si no procede)
-  antiguedad: evaluateAntiguedadRangeCOEF, // años en empleo actual -> restriction: hasta 30 años -> hacer un rango -> use the function evaluateAntiguedadRangeCOEF
-  empleo: 0.474, // Formal>Indep>Informal (mayor valor -> menor riesgo)
-  uso: 0.1, // Productivos(1) mejor que Consumo(3), etc.
-  garantia: 0.1, // hipoteca mejor que sin garantía (3)
-};
-
-function computePD(input: FormState) {
-  const x =
-    COEF.intercepto +
-    COEF.monto * (input.monto || 0) +
-    COEF.buro * mapBuro[input.buro] +
-    COEF.endeudamiento * (input.endeudamiento || 0) +
-    (input.endeudamiento <= 70
-      ? input.ingresos > 5000
-        ? 1 / (COEF.ingresos * (input.monto / input.ingresos))
-        : calculateIncomeCOEF(input.ingresos)
-      : 0) +
-    (typeof COEF.edad === "function"
-      ? COEF.edad(input.edad || 0)
-      : COEF.edad * (input.edad || 0)) + //change into to function
-    COEF.sexo * mapSexo[input.sexo] +
-    (typeof COEF.antiguedad === "function"
-      ? COEF.antiguedad(input.antiguedad || 0)
-      : COEF.antiguedad * (input.antiguedad || 0)) + //change into to a range
-    COEF.empleo * mapEmpleo[input.empleo] +
-    COEF.uso * mapUso[input.uso] +
-    COEF.garantia * mapGarantia[input.garantia];
-
-  // Escalamos a 0..100 y limitamos. Ajusta a tu ecuación real.
-  const raw = x;
-  const pd = Math.max(0, Math.min(100, calculateValue(raw)));
-  return pd * 100;
-}
-
-function calculateValue(m15: number): number {
-  return 1 - 1 / (1 + Math.exp(m15));
-}
+import { usePd } from "../context/PdProvider";
+import {
+  mapBuro,
+  mapSexo,
+  mapEmpleo,
+  mapUso,
+  mapGarantia,
+  type FormState,
+} from "../helpers/pd/model";
 
 // === Estado de formulario ===
-export type FormState = {
-  monto: number; // Q
-  buro: keyof typeof mapBuro; // A-D
-  endeudamiento: number; // %
-  ingresos: number; // Q
-  edad: number; // 15..101
-  sexo: keyof typeof mapSexo; // Masculino/Femenino
-  antiguedad: number; // años
-  empleo: keyof typeof mapEmpleo; // Formal/Independiente/Informal
-  uso: keyof typeof mapUso; // Productivos/Educación/Consumo/Consolidación
-  garantia: keyof typeof mapGarantia; // Hipoteca/Prendaria/…
-};
-
 export default function PDPage() {
-  const [f, setF] = useState<FormState>({
-    monto: 250000,
-    buro: "B",
-    endeudamiento: 15,
-    ingresos: 6000,
-    edad: 32,
-    sexo: "Masculino",
-    antiguedad: 4,
-    empleo: "Formal dependiente",
-    uso: "Consumo",
-    garantia: "Prendaria/Prenda",
-  });
+  const { form: f, setField, pd, reset } = usePd();
 
   // display strings for numeric inputs so users can clear and see placeholders
-  const [displayMonto, setDisplayMonto] = useState<string>("250000");
-  const [displayIngresos, setDisplayIngresos] = useState<string>("6000");
+  const [displayMonto, setDisplayMonto] = useState<string>(String(f.monto ?? ""));
+  const [displayIngresos, setDisplayIngresos] = useState<string>(String(f.ingresos ?? ""));
   const [displayEndeudamiento, setDisplayEndeudamiento] =
-    useState<string>("15");
-  const [displayEdad, setDisplayEdad] = useState<string>("32");
-  const [displayAntiguedad, setDisplayAntiguedad] = useState<string>("4");
+    useState<string>(String(f.endeudamiento ?? ""));
+  const [displayEdad, setDisplayEdad] = useState<string>(String(f.edad ?? ""));
+  const [displayAntiguedad, setDisplayAntiguedad] = useState<string>(String(f.antiguedad ?? ""));
 
-  const pd = useMemo(() => computePD(f), [f]);
+  // Sync displays whenever form changes (e.g., restored from storage)
+  useEffect(() => {
+    setDisplayMonto(String(f.monto ?? ""));
+    setDisplayIngresos(String(f.ingresos ?? ""));
+    setDisplayEndeudamiento(String(f.endeudamiento ?? ""));
+    setDisplayEdad(String(f.edad ?? ""));
+    setDisplayAntiguedad(String(f.antiguedad ?? ""));
+  }, [f.monto, f.ingresos, f.endeudamiento, f.edad, f.antiguedad]);
   const level =
     pd <= 3
       ? { label: "Muy Bajo riesgo", color: "#1802BF" }
@@ -127,11 +49,12 @@ export default function PDPage() {
   const set =
     <K extends keyof FormState>(k: K) =>
     (v: FormState[K]) =>
-      setF((prev) => ({ ...prev, [k]: v }));
+      setField(k, v);
 
   // Text-input friendly numeric handler with clamping and display sync
+  type NumericKeys = "monto" | "endeudamiento" | "ingresos" | "edad" | "antiguedad";
   const handleNumericChange = (
-    key: keyof FormState,
+    key: NumericKeys,
     label: string,
     raw: string,
     min: number,
@@ -164,7 +87,7 @@ export default function PDPage() {
       );
     }
     setDisplay(clamped.toString());
-    setF((prev) => ({ ...prev, [key]: clamped }));
+    setField(key, clamped as unknown as FormState[NumericKeys]);
   };
 
   return (
@@ -423,18 +346,7 @@ export default function PDPage() {
             <button
               className="btn btn-secondary"
               onClick={() => {
-                setF({
-                  monto: 250000,
-                  buro: "B",
-                  endeudamiento: 15,
-                  ingresos: 6000,
-                  edad: 32,
-                  sexo: "Masculino",
-                  antiguedad: 4,
-                  empleo: "Formal dependiente",
-                  uso: "Consumo",
-                  garantia: "Prendaria/Prenda",
-                });
+                reset();
                 setDisplayMonto("250000");
                 setDisplayIngresos("6000");
                 setDisplayEndeudamiento("15");
