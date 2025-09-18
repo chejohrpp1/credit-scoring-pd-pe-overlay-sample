@@ -55,26 +55,26 @@ function validateNumericInput(value: string): {
 }
 
 export default function PEPage() {
-  const { pd: contextPd, setPeResult } = usePd();
+  const { pd: contextPd, setPeResult, form: pdForm } = usePd();
   const [form, setForm] = useState<PEFormState>({
-    pd: 6.7,
+    pd: contextPd,
     lgd: 45,
-    ead: 250000,
+    ead: pdForm.monto,
   });
 
   const [displayForm, setDisplayForm] = useState<PEFormDisplay>({
-    pd: "6.7",
+    pd: contextPd.toFixed(2),
     lgd: "45",
-    ead: "250000",
+    ead: pdForm.monto.toFixed(2),
   });
 
   const el = useMemo(() => computeEL(form), [form]);
 
   // Keep PD in sync with global PD context
   useEffect(() => {
-    setForm((prev) => ({ ...prev, pd: contextPd }));
-    setDisplayForm((prev) => ({ ...prev, pd: contextPd.toFixed(2) }));
-  }, [contextPd]);
+    setForm((prev) => ({ ...prev, pd: contextPd, ead: pdForm.monto }));
+    setDisplayForm((prev) => ({ ...prev, pd: contextPd.toFixed(2), ead: pdForm.monto.toFixed(2) }));
+  }, [contextPd, pdForm.monto]);
 
   // Save computed EL into provider as PE result
   useEffect(() => {
@@ -184,8 +184,8 @@ export default function PEPage() {
           <div className="text-2xl font-mono">
             <span className="text-[var(--brand)]">PE</span> ={" "}
             <span className="text-[var(--ok)]">PD</span> ×{" "}
-            <span className="text-[var(--warn)]">EAD</span> ×{" "}
-            <span className="text-[var(--danger)]">LGD</span>
+            <span className="text-[var(--warn)]">LGD</span> ×{" "}
+            <span className="text-[var(--danger)]">EAD</span>
           </div>
           <div className="text-sm mt-2" style={{ color: "var(--fg-muted)" }}>
             Donde: PD = Probabilidad de Default (%), LGD = Perdida dada al
@@ -292,6 +292,12 @@ export default function PEPage() {
             <div>
               <div className="label mb-1">
                 Exposición en Caso de Default - EAD (Q)
+                <span
+                  className="ml-2 text-xs px-2 py-0.5 rounded border"
+                  style={{ background: "var(--muted)", borderColor: "var(--ring)", color: "var(--fg-muted)" }}
+                >
+                  Solo lectura
+                </span>
               </div>
               <input
                 className="input"
@@ -300,6 +306,10 @@ export default function PEPage() {
                 value={displayForm.ead}
                 onChange={(e) => updateField("ead")(e.target.value)}
                 placeholder="00.0"
+                readOnly
+                aria-readonly
+                title="Solo lectura"
+                style={{ background: "var(--muted)", color: "var(--fg-muted)", cursor: "not-allowed" }}
               />
               <div
                 className="text-xs mt-1"
@@ -333,12 +343,12 @@ export default function PEPage() {
             <tbody>
               <tr>
                 <td className="font-mono text-[var(--ok)]">PD</td>
-                <td>{form.pd}%</td>
+                <td>{form.pd.toFixed(2)}%</td>
                 <td>Probabilidad de Default</td>
               </tr>
               <tr>
                 <td className="font-mono text-[var(--warn)]">LGD</td>
-                <td>{form.lgd}%</td>
+                <td>{form.lgd.toFixed(2)}%</td>
                 <td>Pérdida dada al Default</td>
               </tr>
               <tr>
